@@ -674,8 +674,8 @@
         const brailleImageUpload = document.getElementById('brailleImageUpload');
         const brailleOcrStatus = document.getElementById('brailleOcrStatus');
 
-        const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
-        const OBR_API_KEY = "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";
+        const OBR_API_URL = "https://corsproxy.io/?url=" + encodeURIComponent("https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning");
+        const OBR_API_KEY = "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";
 
         brailleImageUpload.addEventListener('change', async function(e) {
             const file = e.target.files[0];

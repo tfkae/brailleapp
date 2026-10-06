@@ -9,10 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* 
-         * ส่วนนี้คือ CSS ใช้จัดการความสวยงาม
-         * ธีมสีฟ้า-ขาว สะอาดตา
-         */
         :root {
             --primary-blue: #4A90E2;
             --light-blue: #EBF4FA;
@@ -31,9 +27,9 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            touch-action: pan-y; /* อนุญาตให้เลื่อนขึ้นลงได้ แต่ห้ามซูม (ป้องกันหน้าจอเด้งเวลากดเบรลล์) */
-            -webkit-user-select: none; /* ห้ามคลุมดำตัวหนังสือ (iOS) */
-            user-select: none; /* ห้ามคลุมดำตัวหนังสือ (ทั่วไป) */
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         textarea, input, #resultOutput {
@@ -41,7 +37,6 @@
             user-select: text;
         }
 
-        /* แถบด้านบน (Header) */
         header {
             background-color: var(--primary-blue);
             color: var(--white);
@@ -55,7 +50,6 @@
             font-size: 1.5rem;
         }
 
-        /* พื้นที่เนื้อหาหลัก */
         main {
             flex: 1;
             padding: 20px;
@@ -65,7 +59,6 @@
             box-sizing: border-box;
         }
 
-        /* กล่องใส่เนื้อหาแต่ละส่วน */
         .card {
             background: var(--white);
             border-radius: 12px;
@@ -74,7 +67,6 @@
             box-shadow: var(--shadow);
         }
 
-        /* ปุ่มสลับโหมด */
         .mode-switch {
             display: flex;
             justify-content: center;
@@ -98,7 +90,6 @@
             color: var(--white);
         }
 
-        /* พื้นที่แสดงข้อความ */
         textarea {
             width: 100%;
             height: 150px;
@@ -108,10 +99,9 @@
             font-size: 1.2rem;
             resize: none;
             box-sizing: border-box;
-            font-family: monospace; /* ใช้ฟอนต์แบบความกว้างเท่ากันเพื่อความเป๊ะ */
+            font-family: monospace;
         }
 
-        /* ส่วน About Me */
         footer {
             background-color: var(--white);
             padding: 20px;
@@ -122,7 +112,7 @@
         }
 
         footer p { margin: 5px 0; }
-/* สไตล์สำหรับปุ่มจุดเบรลล์ */
+
         .dot-btn {
             width: 50px;
             height: 50px;
@@ -136,7 +126,6 @@
             background-color: var(--primary-blue);
         }
         
-        /* สไตล์ปุ่มควบคุมเบรลล์ (Add, Space ฯลฯ) */
         .ctrl-btn {
             background: var(--light-blue);
             border: 1px solid var(--primary-blue);
@@ -151,49 +140,42 @@
             color: white;
         }
         
-/* ==========================================
-           สไตล์การกลับด้าน (Mirror Mode อัจฉริยะ) 
-           ========================================== */
-        
-        /* กรณีเป็นโหมดขนาน (Parallel View) */
         #resultOutput.mirror-mode .interlinear-container {
-            flex-direction: row-reverse; /* เรียงจากขวาไปซ้าย */
-            justify-content: flex-end; /* ชิดขวา */
+            flex-direction: row-reverse;
+            justify-content: flex-end;
         }
         
-        /* พลิกเฉพาะจุดเบรลล์ให้กลับซ้ายขวา */
         #resultOutput.mirror-mode .interlinear-braille {
             transform: scaleX(-1);
         }
         
-        /* กรณีเป็นโหมดเบรลล์ล้วนๆ (Normal View) */
         #resultOutput.mirror-mode .normal-braille-text {
-             display: block; /* สร้างกล่องขึ้นมาใหม่ */
-             transform: scaleX(-1); /* พลิกกลับด้านทั้งหมด */
-             text-align: left; /* เมื่อโดนพลิก text-align: left จะกลายเป็นไปอยู่ด้านขวา */
-             direction: rtl; /* บังคับให้ลำดับตัวอักษรเรียงจากขวาไปซ้าย */
+             display: block;
+             transform: scaleX(-1);
+             text-align: left;
+             direction: rtl;
              unicode-bidi: bidi-override;
         }
-/* จำกัดความสูงของกล่องผลลัพธ์เพื่อไม่ให้หน้าจอยาวเกินไปบนมือถือ */
+
         #resultOutput {
-            max-height: 300px; /* จำกัดความสูง */
-            overflow-y: auto; /* ถ้าเนื้อหายาวเกิน ให้เลื่อน(scroll) ในกล่องนี้ได้ */
+            max-height: 300px;
+            overflow-y: auto;
             padding: 10px;
             background: #f8f9fa;
             border-radius: 5px;
             border: 1px solid #eee;
         }
-/* สไตล์สำหรับแสดงผลขนาน (Interlinear) */
+
         .interlinear-container {
             display: flex;
-            flex-wrap: wrap; /* ถ้าล้นจอให้ปัดตกบรรทัดใหม่ */
+            flex-wrap: wrap;
             gap: 4px;
             line-height: 1.2;
             margin-bottom: 15px;
         }
         .interlinear-char {
             display: flex;
-            flex-direction: column; /* เรียงบนลงล่าง */
+            flex-direction: column;
             align-items: center;
             min-width: 22px;
         }
@@ -209,7 +191,6 @@
             font-family: monospace;
         }
     </style>
-<!-- โหลด Tesseract.js (AI อ่านข้อความจากภาพ) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
@@ -219,60 +200,48 @@
     </header>
 
     <main>
-        <!-- ปุ่มเลือกโหมดการทำงาน -->
         <div class="mode-switch">
             <button class="btn-mode active" id="btnModeEngToBraille">Eng to Braille</button>
             <button class="btn-mode" id="btnModeBrailleToEng">Braille to Eng</button>
         </div>
 
-<!-- พื้นที่ทำงานหลัก -->
         <div class="card" id="workspace">
             <p id="instructionText" style="margin-top:0; color:var(--text-gray);">Enter English text below:</p>
             
-            <!-- กล่องข้อความ (ใช้ตอนพิมพ์อังกฤษ) -->
-<!-- ส่วนสแกนภาพ (จะโชว์เฉพาะโหมด Eng to Braille) -->
+            <!-- ส่วนอัปโหลดภาพ (โหมด Eng to Braille) - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
             <div id="ocrSection" style="margin-bottom: 15px;">
                 <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
-                    <!-- ปุ่มอัปโหลด/เปิดกล้อง -->
                     <label for="imageUpload" style="background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--primary-blue); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center;">
-                        <i class="fas fa-camera"></i> Scan from Camera / Image
+                        <i class="fas fa-upload"></i> Upload Image
                     </label>
-                    <input type="file" id="imageUpload" accept="image/*" capture="environment" style="display: none;">
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                 </div>
                 
-                <!-- ข้อความสถานะตอน AI กำลังทำงาน -->
                 <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;">
                     <i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...
                 </p>
                 
-                <!-- รูปภาพที่เลือก (ซ่อนไว้ก่อน) -->
                 <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
             </div>
 
-            <!-- กล่องข้อความ (ของเดิม) -->
             <textarea id="mainInput" placeholder="Type English here..."></textarea>
     
-            
-            <!-- คีย์บอร์ดเบรลล์ 3x2 (ซ่อนไว้ก่อน จะโชว์ตอนพิมพ์เบรลล์) -->
-<!-- ให้เติม div บรรทัดนี้ครอบไว้ -->
-                <div id="brailleOcrSection" style="display: none;">
-<!-- ส่วนสแกนภาพเบรลล์เพื่อส่งเข้า Cloud API -->
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                        <label for="brailleImageUpload" style="background: #f0ad4e; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; box-shadow: var(--shadow);">
-                            <i class="fas fa-camera"></i> Scan Braille Paper
-                        </label>
-                        <input type="file" id="brailleImageUpload" accept="image/*" capture="environment" style="display: none;">
-                    </div>
-                
-                
-                <!-- ข้อความสถานะ -->
-                    <p id="brailleOcrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: -5px 0 15px 0; display: none; text-align: center;">
-                        <i class="fas fa-spinner fa-spin"></i> Connecting to Cloud AI...
-                    </p>
+            <div id="brailleOcrSection" style="display: none;">
+                <!-- ส่วนอัปโหลดภาพเบรลล์ - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                    <label for="brailleImageUpload" style="background: #f0ad4e; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; box-shadow: var(--shadow);">
+                        <i class="fas fa-upload"></i> Upload Braille Image
+                    </label>
+                    <input type="file" id="brailleImageUpload" accept="image/*" style="display: none;">
                 </div>
+            
+                <p id="brailleOcrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: -5px 0 15px 0; display: none; text-align: center;">
+                    <i class="fas fa-spinner fa-spin"></i> Connecting to Cloud AI...
+                </p>
+            </div>
+
             <div id="brailleKeyboard" style="display: none; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                    <!-- ปุ่ม 6 จุด (เซลล์เบรลล์) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
                         <button class="dot-btn" data-dot="1"></button>
                         <button class="dot-btn" data-dot="4"></button>
@@ -283,7 +252,6 @@
                     </div>
                 </div>
                 
-                <!-- ปุ่มควบคุมของคีย์บอร์ดเบรลล์ -->
                 <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
                     <button class="ctrl-btn" id="btnAddBraille">Add</button>
                     <button class="ctrl-btn" id="btnSpace">Space</button>
@@ -291,14 +259,12 @@
                     <button class="ctrl-btn" id="btnBackspace">Bksp</button>
                 </div>
                 
-                <!-- พื้นที่แสดงจุดเบรลล์ที่พิมพ์ลงไปแล้ว -->
                 <div style="margin-top: 15px; text-align: left;">
                     <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-gray);">Your Braille Input:</p>
                     <div id="brailleInputDisplay" style="min-height: 40px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word;"></div>
                 </div>
             </div>
 
-<!-- ปุ่มสั่งแปล และ Checkbox ขนาน -->
             <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
                 <label style="font-size: 0.95rem; color: var(--text-dark); cursor: pointer; font-weight: 600;">
                     <input type="checkbox" id="chkInterlinear" style="transform: scale(1.2); margin-right: 5px;"> 
@@ -309,8 +275,8 @@
                     Translate
                 </button>
             </div>
+        </div>
 
-        <!-- พื้นที่แสดงผลลัพธ์ -->
         <div class="card" id="resultArea" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="margin: 0; color: var(--primary-blue);">Result</h3>
@@ -319,11 +285,6 @@
                 </button>
             </div>
             <div id="resultOutput" style="font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word; line-height: 1.8;"></div>
-        </div>
-
-        <!-- พื้นที่สำหรับแสดงผลลัพธ์ (จะทำใน Phase ต่อไป) -->
-        <div class="card" id="resultArea" style="display: none;">
-            <!-- เดี๋ยวเราจะเอาผลลัพธ์มาโชว์ตรงนี้ -->
         </div>
 
     </main>
@@ -335,33 +296,24 @@
     </footer>
 
     <script>
-        // ==========================================
-        // 1. พจนานุกรม (Dictionary) อักษร <-> เบรลล์ (Unicode)
-        // ==========================================
-
         const brailleDict = {
             'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
             'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
             'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',
             '1': '⠁', '2': '⠃', '3': '⠉', '4': '⠙', '5': '⠑', '6': '⠋', '7': '⠛', '8': '⠓', '9': '⠊', '0': '⠚',
             ',': '⠂', ';': '⠆', ':': '⠒', '.': '⠲', '!': '⠖', '(': '⠦', ')': '⠴', '?': '⠢', '"': '⠦', "'": '⠄', '-': '⠤',
-            ' ': '⠀' // Space
+            ' ': '⠀'
         };
-        const numSign = '⠼'; // เครื่องหมายบอกว่าข้างหลังคือตัวเลข
-        const capSign = '⠠'; // เครื่องหมายบอกว่าตัวพิมพ์ใหญ่
+        const numSign = '⠼';
+        const capSign = '⠠';
 
-        // สร้างดิกชันนารีแบบกลับด้าน (เบรลล์ -> อังกฤษ)
         const reverseBrailleDict = {};
         for (let key in brailleDict) {
             reverseBrailleDict[brailleDict[key]] = key;
         }
-        // (สำหรับการแปลเบรลล์เป็นอังกฤษแบบสมบูรณ์ จะต้องเขียนลอจิกจัดการตัวเลขแยกต่างหาก)
 
-        // ==========================================
-        // 2. ตัวแปรอ้างอิงหน้าจอ (UI Elements)
-        // ==========================================
-        let currentMode = 'E2B'; // E2B = English to Braille, B2E = Braille to English
-        let brailleInputRaw = ""; // เก็บค่าเบรลล์ที่พิมพ์เอง
+        let currentMode = 'E2B';
+        let brailleInputRaw = "";
 
         const btnE2B = document.getElementById('btnModeEngToBraille');
         const btnB2E = document.getElementById('btnModeBrailleToEng');
@@ -375,11 +327,8 @@
         const brailleInputDisplay = document.getElementById('brailleInputDisplay');
         const dotBtns = document.querySelectorAll('.dot-btn');
 
-        // ==========================================
-        // 3. ระบบสลับโหมด
-        // ==========================================
-        const ocrSection = document.getElementById('ocrSection'); // <- ประกาศตัวแปรนี้เพิ่ม (ถ้ายังไม่มี)
-        const brailleOcrSection = document.getElementById('brailleOcrSection'); // <- เพิ่มบรรทัดนี้
+        const ocrSection = document.getElementById('ocrSection');
+        const brailleOcrSection = document.getElementById('brailleOcrSection');
 
         btnE2B.addEventListener('click', () => {
             currentMode = 'E2B';
@@ -388,8 +337,8 @@
             
             mainInput.style.display = 'block';
             brailleKeyboard.style.display = 'none';
-            ocrSection.style.display = 'block'; // <- ให้โชว์ปุ่มกล้อง
-            brailleOcrSection.style.display = 'none'; // <- เพิ่มบรรทัดนี้ (ซ่อนปุ่มกล้องเบรลล์)
+            ocrSection.style.display = 'block';
+            brailleOcrSection.style.display = 'none';
 
             instructionText.innerText = "Enter English text below:";
             resultArea.style.display = 'none';
@@ -402,81 +351,66 @@
             
             mainInput.style.display = 'none';
             brailleKeyboard.style.display = 'block';
-            ocrSection.style.display = 'none'; // <- ซ่อนปุ่มกล้อง เพราะโหมดเบรลล์เรายังไม่ได้ทำ AI
-            brailleOcrSection.style.display = 'block'; // <- เพิ่มบรรทัดนี้ (โชว์ปุ่มกล้องเบรลล์)
+            ocrSection.style.display = 'none';
+            brailleOcrSection.style.display = 'block';
 
             instructionText.innerText = "Press dots to create a Braille cell, then tap Add:";
             resultArea.style.display = 'none';
             updateBrailleDisplay();
         });
 
-        // ==========================================
-        // 4. ระบบคีย์บอร์ดเบรลล์
-        // ==========================================
-        // กดจุดทึบ/โปร่ง
         dotBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 btn.classList.toggle('active');
             });
         });
 
-        // ฟังก์ชันแปลงจุด 6 จุดที่กดไว้ ให้กลายเป็นอักษรเบรลล์ Unicode 1 ตัว
         function getCellFromDots() {
-            let dotMap = [0,0,0,0,0,0,0,0]; // dot 1-8 (เราใช้ 1-6)
+            let dotMap = [0,0,0,0,0,0,0,0];
             dotBtns.forEach(btn => {
                 if (btn.classList.contains('active')) {
                     dotMap[parseInt(btn.getAttribute('data-dot')) - 1] = 1;
                 }
             });
-            // คำนวณรหัส Unicode (มาตรฐานจุดเบรลล์)
             let base = 0x2800;
             let val = (dotMap[0]<<0) | (dotMap[1]<<1) | (dotMap[2]<<2) | (dotMap[3]<<3) | (dotMap[4]<<4) | (dotMap[5]<<5);
             return String.fromCharCode(base + val);
         }
 
-        // รีเซ็ตจุดให้ขาวหมด
         function clearDots() {
             dotBtns.forEach(btn => btn.classList.remove('active'));
         }
 
-        // แสดงผลเบรลล์ที่พิมพ์ในกล่อง
         function updateBrailleDisplay() {
             brailleInputDisplay.innerText = brailleInputRaw;
         }
 
-        // ปุ่ม Add
         document.getElementById('btnAddBraille').addEventListener('click', () => {
             let cell = getCellFromDots();
-            if (cell !== String.fromCharCode(0x2800)) { // ถ้าไม่ใช่ช่องว่าง
+            if (cell !== String.fromCharCode(0x2800)) {
                 brailleInputRaw += cell;
                 updateBrailleDisplay();
                 clearDots();
             }
         });
 
-        // ปุ่ม Space
         document.getElementById('btnSpace').addEventListener('click', () => {
             brailleInputRaw += '⠀';
             updateBrailleDisplay();
             clearDots();
         });
 
-        // ปุ่ม Enter (ขึ้นบรรทัดใหม่)
         document.getElementById('btnEnter').addEventListener('click', () => {
             brailleInputRaw += '\n';
             updateBrailleDisplay();
             clearDots();
         });
 
-        // ปุ่ม Backspace (ลบตัวสุดท้าย)
         document.getElementById('btnBackspace').addEventListener('click', () => {
             brailleInputRaw = brailleInputRaw.slice(0, -1);
             updateBrailleDisplay();
         });
 
-// ==========================================
-        // 5. ระบบแปลภาษา (Translate Logic)
-        // ==========================================
         const chkInterlinear = document.getElementById('chkInterlinear');
 
         btnTranslate.addEventListener('click', () => {
@@ -485,7 +419,6 @@
             let outputText = "";
 
             if (currentMode === 'E2B') {
-                // แปล อังกฤษ -> เบรลล์
                 btnMirror.style.display = 'block';
                 btnMirror.classList.remove('active');
                 resultOutput.classList.remove('mirror-mode');
@@ -524,8 +457,7 @@
                     }
                     outputText += '</div>';
                 } else {
-                    // โหมดแสดงปกติ 1 อัน
-                    outputText = '<div class="normal-braille-text">'; // ห่อด้วย div เพื่อให้พลิกเฉพาะอันนี้
+                    outputText = '<div class="normal-braille-text">';
                     for (let i = 0; i < text.length; i++) {
                         let char = text[i];
                         if (char === ' ') { outputText += brailleDict[' ']; isNumberMode = false; } 
@@ -539,11 +471,10 @@
                             outputText += brailleDict[char.toLowerCase()] || char;
                         }
                     }
-                    outputText += '</div>'; // ปิด div
+                    outputText += '</div>';
                 }
             } 
             else {
-                // แปล เบรลล์ -> อังกฤษ
                 btnMirror.style.display = 'none';
                 let lines = brailleInputRaw.split('\n');
 
@@ -575,7 +506,6 @@
                     }
                     outputText += '</div>';
                 } else {
-                    // โหมดแสดงปกติ 1 อัน
                     let finalLines = lines.map(line => {
                         let engLine = "";
                         let isNum = false; let isCap = false;
@@ -603,15 +533,10 @@
             resultOutput.innerHTML = outputText;
         });
 
-        // ==========================================
-        // 6. ปุ่ม Mirror
-        // ==========================================
         btnMirror.addEventListener('click', () => {
             resultOutput.classList.toggle('mirror-mode');
         });
-// ==========================================
-        // 7. ระบบอ่านภาพ (OCR)
-        // ==========================================
+
         const imageUpload = document.getElementById('imageUpload');
         const imagePreview = document.getElementById('imagePreview');
         const ocrStatus = document.getElementById('ocrStatus');
@@ -620,12 +545,10 @@
             const file = e.target.files[0];
             if (!file) return;
 
-// ป้องกันผู้ใช้กดปุ่มซ้ำระหว่างรอ
             const scanLabel = document.querySelector('label[for="imageUpload"]');
-            scanLabel.style.pointerEvents = 'none'; // ล็อกการคลิก
-            scanLabel.style.opacity = '0.6'; // ทำให้ปุ่มดูซีดลง
+            scanLabel.style.pointerEvents = 'none';
+            scanLabel.style.opacity = '0.6';
 
-            // โชว์ภาพตัวอย่างให้ผู้ใช้ดู
             const reader = new FileReader();
             reader.onload = function(event) {
                 imagePreview.src = event.target.result;
@@ -633,25 +556,18 @@
             }
             reader.readAsDataURL(file);
 
-            // เริ่มกระบวนการส่งภาพให้ AI อ่าน
-            ocrStatus.style.display = 'block'; // โชว์ข้อความกำลังโหลด
+            ocrStatus.style.display = 'block';
             mainInput.value = "Scanning... please wait.";
 
             Tesseract.recognize(
                 file,
-                'eng', // ระบุว่าเราจะอ่านภาษาอังกฤษ
-                { 
-                    // ส่วนนี้ถ้าไม่ต้องการดูความคืบหน้า (Log) ให้ปล่อยว่างไว้
-                    logger: m => console.log(m) 
-                }
+                'eng',
+                { logger: m => console.log(m) }
             ).then(({ data: { text } }) => {
-                // พอ AI อ่านเสร็จ
-                scanLabel.style.pointerEvents = 'auto'; // ปลดล็อกปุ่ม
+                scanLabel.style.pointerEvents = 'auto';
                 scanLabel.style.opacity = '1';
-                ocrStatus.style.display = 'none'; // ซ่อนข้อความโหลด
+                ocrStatus.style.display = 'none';
                 
-                // เอาข้อความที่ได้ไปใส่ในกล่อง เพื่อให้ผู้ใช้แก้ไขก่อนกดแปล
-                // บางทีการทำความสะอาดข้อความลบช่องว่างแปลกๆ ก็ช่วยได้
                 let cleanedText = text.replace(/\n\s*\n/g, '\n').trim();
                 
                 if (cleanedText === "") {
@@ -660,7 +576,7 @@
                     mainInput.value = cleanedText;
                 }
             }).catch(err => {
-                scanLabel.style.pointerEvents = 'auto'; // ปลดล็อกปุ่มกรณี Error
+                scanLabel.style.pointerEvents = 'auto';
                 scanLabel.style.opacity = '1';
                 console.error(err);
                 ocrStatus.style.display = 'none';
@@ -668,13 +584,9 @@
             });
         });
 
-// ==========================================
-        // 8. ระบบอ่านภาพเบรลล์ผ่าน Cloud API (เชื่อมต่อตรง ของจริง)
-        // ==========================================
         const brailleImageUpload = document.getElementById('brailleImageUpload');
         const brailleOcrStatus = document.getElementById('brailleOcrStatus');
 
-        // [แก้ตรงนี้] ตัด Proxy ออก ยิงตรงเข้า Hugging Face API ได้เลย เพราะเขารองรับ CORS อยู่แล้ว
         const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
         const OBR_API_KEY = "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";
 
@@ -694,7 +606,6 @@
 
                 brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
                 
-                // ยิงตรงไปที่เซิร์ฟเวอร์ AI แบบ Real-time
                 const response = await fetch(OBR_API_URL, {
                     method: "POST",
                     headers: {
@@ -707,15 +618,13 @@
                 const result = await response.json();
 
                 if (!response.ok) {
-                    // ดักกรณีโมเดลกำลังตื่นนอน (Cold Start)
                     if (result.error && result.error.includes("loading")) {
                         let waitTime = result.estimated_time || 20;
-                        throw new Error(`AI กำลังเตรียมพร้อม (Model is loading)... โปรดรอ ${Math.ceil(waitTime)} วินาทีแล้วลองกดสแกนใหม่อีกครั้ง`);
+                        throw new Error(`AI กำลังเตรียมพร้อม (Model is loading)... โปรดรอ ${Math.ceil(waitTime)} วินาทีแล้วลองกดอัปโหลดใหม่อีกครั้ง`);
                     }
                     throw new Error(result.error || "Server Error: " + response.statusText);
                 }
                 
-                // ดึงข้อความที่ AI อ่านได้จริงมาแสดงผล
                 let extractedText = "";
                 if (Array.isArray(result) && result[0]?.generated_text) {
                     extractedText = result[0].generated_text;

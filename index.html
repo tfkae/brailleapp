@@ -674,7 +674,6 @@
         const brailleImageUpload = document.getElementById('brailleImageUpload');
         const brailleOcrStatus = document.getElementById('brailleOcrStatus');
 
-        // พื้นที่สำหรับใส่ URL และ API Key จากผู้ให้บริการ AI (เช่น Hugging Face, Roboflow หรือเซิร์ฟเวอร์มหาลัย)
         const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
         const OBR_API_KEY = "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";
 
@@ -682,26 +681,18 @@
             const file = e.target.files[0];
             if (!file) return;
             
-            // ล็อกปุ่มป้องกันผู้ใช้กดซ้ำ
             const bScanLabel = document.querySelector('label[for="brailleImageUpload"]');
             bScanLabel.style.pointerEvents = 'none';
             bScanLabel.style.opacity = '0.6';
 
-            // อัปเดต UI ให้รู้ว่ากำลังอัปโหลด
             brailleOcrStatus.innerHTML = '<i class="fas fa-upload"></i> Uploading to Cloud AI...';
             brailleOcrStatus.style.display = 'block';
 
             try {
-                // แปลงไฟล์รูปภาพเป็นข้อมูล Binary เพื่อส่งผ่านเน็ต
                 const arrayBuffer = await file.arrayBuffer();
 
                 brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
                 
-                // ยิงข้อมูลไปที่ Server AI
-                /* 
-                  * หมายเหตุ: โค้ดส่วนนี้จะทำงานสมบูรณ์เมื่อคุณใส่ URL และ API Key ของจริงด้านบน
-                  * ปัจจุบันนี้โค้ดจะวิ่งไปที่ URL เปล่าๆ แล้วจะโดนบล็อก (Error) เพื่อให้คุณเห็น Flow จริง
-                  */
                 const response = await fetch(OBR_API_URL, {
                     method: "POST",
                     headers: {
@@ -715,24 +706,30 @@
                     throw new Error("Server Error: " + response.statusText);
                 }
 
-                // รับผลลัพธ์จากเซิร์ฟเวอร์
                 const result = await response.json();
                 
-                // ดึงข้อความเบรลล์ออกมา (สมมติว่า API คืนค่ากลับมาในชื่อ generated_text)
-                let extractedBraille = result.generated_text || result[0]?.generated_text; 
+                // รองรับรูปแบบข้อมูลที่ AI ส่งกลับมาหลากหลายรูปแบบ
+                let extractedText = "";
+                if (Array.isArray(result) && result[0]?.generated_text) {
+                    extractedText = result[0].generated_text;
+                } else if (result.generated_text) {
+                    extractedText = result.generated_text;
+                } else {
+                    extractedText = JSON.stringify(result);
+                }
 
-                // อัปเดตลงหน้าจอ
-                brailleInputRaw = extractedBraille;
+                // นำข้อความที่ได้ใส่ลงช่อง
+                brailleInputRaw = extractedText;
                 updateBrailleDisplay();
 
             } catch (error) {
                 console.error("OBR Connection Error:", error);
                 
-                // แจ้งเตือนผู้ใช้เมื่อยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์จริง
-                alert("ระบบเชื่อมต่อ Cloud API พร้อมแล้ว!\n\nสถานะปัจจุบัน: รอการกรอก API Key และ URL ของโมเดล AI ใน Source Code เพื่อให้ใช้งานได้จริง");
+                // เปลี่ยนจาก alert เป็นการพ่นข้อความบอกในกล่องเบรลล์แทน เพื่อไม่ให้ขัดจังหวะการใช้งาน
+                brailleInputRaw = "Error: Could not connect to AI. Please try again.";
+                updateBrailleDisplay();
                 
             } finally {
-                // ปลดล็อกปุ่ม
                 bScanLabel.style.pointerEvents = 'auto';
                 bScanLabel.style.opacity = '1';
                 brailleOcrStatus.style.display = 'none';

@@ -669,12 +669,13 @@
         });
 
 // ==========================================
-        // 8. ระบบอ่านภาพเบรลล์ผ่าน Cloud API (Real Integration)
+        // 8. ระบบอ่านภาพเบรลล์ผ่าน Cloud API (เชื่อมต่อตรง ของจริง)
         // ==========================================
         const brailleImageUpload = document.getElementById('brailleImageUpload');
         const brailleOcrStatus = document.getElementById('brailleOcrStatus');
 
-        const OBR_API_URL = "https://corsproxy.io/?url=" + encodeURIComponent("https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning");
+        // [แก้ตรงนี้] ตัด Proxy ออก ยิงตรงเข้า Hugging Face API ได้เลย เพราะเขารองรับ CORS อยู่แล้ว
+        const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
         const OBR_API_KEY = "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";
 
         brailleImageUpload.addEventListener('change', async function(e) {
@@ -693,6 +694,7 @@
 
                 brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
                 
+                // ยิงตรงไปที่เซิร์ฟเวอร์ AI แบบ Real-time
                 const response = await fetch(OBR_API_URL, {
                     method: "POST",
                     headers: {
@@ -702,13 +704,18 @@
                     body: arrayBuffer
                 });
 
-                if (!response.ok) {
-                    throw new Error("Server Error: " + response.statusText);
-                }
-
                 const result = await response.json();
+
+                if (!response.ok) {
+                    // ดักกรณีโมเดลกำลังตื่นนอน (Cold Start)
+                    if (result.error && result.error.includes("loading")) {
+                        let waitTime = result.estimated_time || 20;
+                        throw new Error(`AI กำลังเตรียมพร้อม (Model is loading)... โปรดรอ ${Math.ceil(waitTime)} วินาทีแล้วลองกดสแกนใหม่อีกครั้ง`);
+                    }
+                    throw new Error(result.error || "Server Error: " + response.statusText);
+                }
                 
-                // รองรับรูปแบบข้อมูลที่ AI ส่งกลับมาหลากหลายรูปแบบ
+                // ดึงข้อความที่ AI อ่านได้จริงมาแสดงผล
                 let extractedText = "";
                 if (Array.isArray(result) && result[0]?.generated_text) {
                     extractedText = result[0].generated_text;
@@ -718,15 +725,12 @@
                     extractedText = JSON.stringify(result);
                 }
 
-                // นำข้อความที่ได้ใส่ลงช่อง
                 brailleInputRaw = extractedText;
                 updateBrailleDisplay();
 
             } catch (error) {
                 console.error("OBR Connection Error:", error);
-                
-                // เปลี่ยนจาก alert เป็นการพ่นข้อความบอกในกล่องเบรลล์แทน เพื่อไม่ให้ขัดจังหวะการใช้งาน
-                brailleInputRaw = "Error: Could not connect to AI. Please try again.";
+                brailleInputRaw = error.message;
                 updateBrailleDisplay();
                 
             } finally {

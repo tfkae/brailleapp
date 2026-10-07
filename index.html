@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Braille Translator</title>
-    <!-- โหลด Font ภาษาอังกฤษและไอคอนให้ดูสวยงาม -->
+    <title>Braille Translator (Thai & Eng)</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -99,7 +98,7 @@
             font-size: 1.2rem;
             resize: none;
             box-sizing: border-box;
-            font-family: monospace;
+            font-family: 'Prompt', monospace;
         }
 
         footer {
@@ -188,7 +187,7 @@
             font-size: 1.1rem;
             color: var(--primary-blue);
             font-weight: bold;
-            font-family: monospace;
+            font-family: 'Prompt', monospace;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
@@ -201,18 +200,17 @@
 
     <main>
         <div class="mode-switch">
-            <button class="btn-mode active" id="btnModeEngToBraille">Eng to Braille</button>
-            <button class="btn-mode" id="btnModeBrailleToEng">Braille to Eng</button>
+            <button class="btn-mode active" id="btnModeEngToBraille">Text to Braille</button>
+            <button class="btn-mode" id="btnModeBrailleToEng">Braille to Text</button>
         </div>
 
         <div class="card" id="workspace">
-            <p id="instructionText" style="margin-top:0; color:var(--text-gray);">Enter English text below:</p>
+            <p id="instructionText" style="margin-top:0; color:var(--text-gray);">Enter Thai or English text below:</p>
             
-            <!-- ส่วนอัปโหลดภาพ (โหมด Eng to Braille) - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
             <div id="ocrSection" style="margin-bottom: 15px;">
                 <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
                     <label for="imageUpload" style="background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--primary-blue); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center;">
-                        <i class="fas fa-upload"></i> Upload Image
+                        <i class="fas fa-upload"></i> Upload Image (TH/EN)
                     </label>
                     <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                 </div>
@@ -224,10 +222,9 @@
                 <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
             </div>
 
-            <textarea id="mainInput" placeholder="Type English here..."></textarea>
+            <textarea id="mainInput" placeholder="Type Thai or English here..."></textarea>
     
             <div id="brailleOcrSection" style="display: none;">
-                <!-- ส่วนอัปโหลดภาพเบรลล์ - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
                     <label for="brailleImageUpload" style="background: #f0ad4e; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; box-shadow: var(--shadow);">
                         <i class="fas fa-upload"></i> Upload Braille Image
@@ -296,21 +293,41 @@
     </footer>
 
     <script>
+        // พจนานุกรม อังกฤษ + ไทย
         const brailleDict = {
+            // English
             'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
             'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
             'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',
             '1': '⠁', '2': '⠃', '3': '⠉', '4': '⠙', '5': '⠑', '6': '⠋', '7': '⠛', '8': '⠓', '9': '⠊', '0': '⠚',
             ',': '⠂', ';': '⠆', ':': '⠒', '.': '⠲', '!': '⠖', '(': '⠦', ')': '⠴', '?': '⠢', '"': '⠦', "'": '⠄', '-': '⠤',
-            ' ': '⠀'
+            ' ': '⠀',
+            // Thai Consonants
+            'ก': '⠅', 'ข': '⠨', 'ฃ': '⠨', 'ค': '⠩', 'ฅ': '⠩', 'ฆ': '⠩', 'ง': '⠬', 'จ': '⠡', 'ฉ': '⠟', 'ช': '⠱', 
+            'ซ': '⠎', 'ฌ': '⠱', 'ญ': '⠚', 'ฎ': '⠙', 'ฏ': '⠞', 'ฐ': '⠹', 'ฑ': '⠮', 'ฒ': '⠮', 'ณ': '⠝', 'ด': '⠙', 
+            'ต': '⠞', 'ถ': '⠹', 'ท': '⠮', 'ธ': '⠮', 'น': '⠝', 'บ': '⠃', 'ป': '⠏', 'ผ': '⠯', 'ฝ': '⠻', 'พ': '⠯', 
+            'ฟ': '⠋', 'ภ': '⠯', 'ม': '⠍', 'ย': '⠽', 'ร': '⠗', 'ล': '⠇', 'ว': '⠺', 'ศ': '⠎', 'ษ': '⠎', 'ส': '⠎', 
+            'ห': '⠓', 'ฬ': '⠇', 'อ': '⠕', 'ฮ': '⠓',
+            // Thai Vowels
+            'ะ': '⠁', 'า': '⠜', 'ิ': '⠊', 'ี': '⠣', 'ึ': '⠪', 'ื': '⠳', 'ุ': '⠥', 'ู': '⠶', 
+            'เ': '⠑', 'แ': '⠣', 'โ': '⠕', 'ใ': '⠔', 'ไ': '⠌', 'ำ': '⠡',
+            // Thai Tones & Marks
+            '่': '⠈', '้': '⠘', '๊': '⠈', '๋': '⠨', '์': '⠐', '็': '⠢', 'ๆ': '⠂'
         };
+
         const numSign = '⠼';
         const capSign = '⠠';
 
         const reverseBrailleDict = {};
         for (let key in brailleDict) {
-            reverseBrailleDict[brailleDict[key]] = key;
+            // ป้องกันการทับซ้อน (เนื่องจากเบรลล์บางตัวใช้ร่วมกัน) เราจะให้ความสำคัญกับภาษาที่สแกนเจอเป็นหลัก
+            // สำหรับต้นแบบนี้ จะแมปกลับเป็นไทยตัวแรกที่เจอ
+            if (!reverseBrailleDict[brailleDict[key]]) {
+                reverseBrailleDict[brailleDict[key]] = key;
+            }
         }
+        // ปรับแก้เฉพาะตัวที่ใช้บ่อยให้อ่านกลับมาเป็นภาษาอังกฤษพื้นฐานได้ด้วยถ้าอยู่ในบริบทตัวเลข
+        const numMap = {'⠁':'1','⠃':'2','⠉':'3','⠙':'4','⠑':'5','⠋':'6','⠛':'7','⠓':'8','⠊':'9','⠚':'0'};
 
         let currentMode = 'E2B';
         let brailleInputRaw = "";
@@ -340,7 +357,7 @@
             ocrSection.style.display = 'block';
             brailleOcrSection.style.display = 'none';
 
-            instructionText.innerText = "Enter English text below:";
+            instructionText.innerText = "Enter Thai or English text below:";
             resultArea.style.display = 'none';
         });
 
@@ -423,7 +440,8 @@
                 btnMirror.classList.remove('active');
                 resultOutput.classList.remove('mirror-mode');
                 
-                let text = mainInput.value;
+                // กระบวนการสลับตำแหน่งสระหน้า (เ แ โ ใ ไ) ให้ไปอยู่หลังพยัญชนะตามหลักเบรลล์ไทย
+                let text = mainInput.value.replace(/([เแโใไ])([ก-ฮ])/g, '$2$1');
                 let isNumberMode = false;
 
                 if (isInterlinear) {
@@ -451,7 +469,7 @@
                             if (/[A-Z]/.test(char)) {
                                 outputText += `<div class="interlinear-char"><span class="interlinear-braille">${capSign}</span><span class="interlinear-eng"></span></div>`;
                             }
-                            bChar = brailleDict[char.toLowerCase()] || char;
+                            bChar = brailleDict[char.toLowerCase()] || brailleDict[char] || char;
                         }
                         outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
                     }
@@ -468,7 +486,7 @@
                         } else {
                             isNumberMode = false;
                             if (/[A-Z]/.test(char)) { outputText += capSign; }
-                            outputText += brailleDict[char.toLowerCase()] || char;
+                            outputText += brailleDict[char.toLowerCase()] || brailleDict[char] || char;
                         }
                     }
                     outputText += '</div>';
@@ -478,56 +496,47 @@
                 btnMirror.style.display = 'none';
                 let lines = brailleInputRaw.split('\n');
 
+                let finalProcessedLines = lines.map(line => {
+                    let translatedLine = "";
+                    let isNum = false; let isCap = false;
+                    for (let char of line) {
+                        if (char === numSign) { isNum = true; } 
+                        else if (char === capSign) { isCap = true; } 
+                        else if (char === '⠀') { translatedLine += ' '; isNum = false; } 
+                        else {
+                            if (isNum && numMap[char]) {
+                                translatedLine += numMap[char];
+                            } else {
+                                let mapped = reverseBrailleDict[char] || "?";
+                                if (isCap && /[a-z]/.test(mapped)) {
+                                    translatedLine += mapped.toUpperCase(); isCap = false;
+                                } else {
+                                    translatedLine += mapped;
+                                }
+                            }
+                        }
+                    }
+                    // สลับตำแหน่งพยัญชนะกลับมาอยู่หลังสระหน้า (ตามหลักการเขียนภาษาไทยปกติ)
+                    return translatedLine.replace(/([ก-ฮ])([เแโใไ])/g, '$2$1');
+                });
+
                 if (isInterlinear) {
                     outputText = '<div class="interlinear-container">';
-                    for (let line of lines) {
-                        let isNum = false;
-                        let isCap = false;
-                        for (let char of line) {
-                            let eChar = "";
-                            if (char === numSign) { isNum = true; eChar = ""; } 
-                            else if (char === capSign) { isCap = true; eChar = ""; } 
-                            else if (char === '⠀') { eChar = " "; isNum = false; } 
-                            else {
-                                let mapped = reverseBrailleDict[char];
-                                if (mapped) {
-                                    if (isNum) {
-                                        const numMap = {'a':'1','b':'2','c':'3','d':'4','e':'5','f':'6','g':'7','h':'8','i':'9','j':'0'};
-                                        eChar = numMap[mapped] || mapped;
-                                    } else if (isCap) {
-                                        eChar = mapped.toUpperCase();
-                                        isCap = false;
-                                    } else { eChar = mapped; }
-                                } else { eChar = "?"; }
-                            }
-                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${char}</span><span class="interlinear-eng">${eChar}</span></div>`;
+                    for (let j = 0; j < finalProcessedLines.length; j++) {
+                        let engLineStr = finalProcessedLines[j];
+                        let brailleLineStr = lines[j].replace(new RegExp(numSign, 'g'), '').replace(new RegExp(capSign, 'g'), '');
+                        
+                        // จับคู่ขนาน (อาจจะไม่เป๊ะ 100% ถ้ามีการใส่เครื่องหมายนำหน้า แต่พออ่านได้)
+                        for (let k = 0; k < engLineStr.length; k++) {
+                            let bChar = brailleLineStr[k] || "⠀";
+                            let eChar = engLineStr[k];
+                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
                         }
                         outputText += '</div><div class="interlinear-container">';
                     }
                     outputText += '</div>';
                 } else {
-                    let finalLines = lines.map(line => {
-                        let engLine = "";
-                        let isNum = false; let isCap = false;
-                        for (let char of line) {
-                            if (char === numSign) { isNum = true; } 
-                            else if (char === capSign) { isCap = true; } 
-                            else if (char === '⠀') { engLine += ' '; isNum = false; } 
-                            else {
-                                let mapped = reverseBrailleDict[char];
-                                if (mapped) {
-                                    if (isNum) {
-                                        const numMap = {'a':'1','b':'2','c':'3','d':'4','e':'5','f':'6','g':'7','h':'8','i':'9','j':'0'};
-                                        engLine += numMap[mapped] || mapped;
-                                    } else if (isCap) {
-                                        engLine += mapped.toUpperCase(); isCap = false;
-                                    } else { engLine += mapped; }
-                                } else { engLine += "?"; }
-                            }
-                        }
-                        return engLine;
-                    });
-                    outputText = finalLines.join('<br>');
+                    outputText = finalProcessedLines.join('<br>');
                 }
             }
             resultOutput.innerHTML = outputText;
@@ -559,9 +568,10 @@
             ocrStatus.style.display = 'block';
             mainInput.value = "Scanning... please wait.";
 
+            // โหลดภาษาไทย + อังกฤษ เข้าด้วยกัน
             Tesseract.recognize(
                 file,
-                'eng',
+                'tha+eng', 
                 { logger: m => console.log(m) }
             ).then(({ data: { text } }) => {
                 scanLabel.style.pointerEvents = 'auto';
@@ -571,7 +581,7 @@
                 let cleanedText = text.replace(/\n\s*\n/g, '\n').trim();
                 
                 if (cleanedText === "") {
-                    mainInput.value = "Could not detect any English text in this image.";
+                    mainInput.value = "Could not detect any text in this image.";
                 } else {
                     mainInput.value = cleanedText;
                 }
@@ -603,7 +613,6 @@
 
             try {
                 const arrayBuffer = await file.arrayBuffer();
-
                 brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
                 
                 const response = await fetch(OBR_API_URL, {

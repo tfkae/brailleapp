@@ -18,6 +18,7 @@
             --shadow: 0 4px 6px rgba(0,0,0,0.05);
             --success: #28a745;
             --danger: #dc3545;
+            --warning: #f0ad4e;
         }
 
         body {
@@ -131,8 +132,9 @@
             background: var(--primary-blue); color: white; border: none; 
             padding: 10px 40px; border-radius: 8px; font-size: 1.1rem; 
             cursor: pointer; font-weight: bold; box-shadow: var(--shadow);
-            width: 100%; box-sizing: border-box;
+            width: 100%; box-sizing: border-box; transition: 0.2s;
         }
+        .btn-action:active { transform: scale(0.98); }
         
         #resultOutput.mirror-mode .interlinear-container { flex-direction: row-reverse; justify-content: flex-end; }
         #resultOutput.mirror-mode .interlinear-braille { transform: scaleX(-1); }
@@ -162,6 +164,26 @@
         .result-table th { background-color: var(--light-blue); color: var(--primary-blue); }
         .text-success { color: var(--success); font-weight: bold; }
         .text-danger { color: var(--danger); font-weight: bold; }
+
+        /* Flashcard Styles */
+        .flashcard {
+            background: var(--white);
+            border: 2px solid var(--primary-blue);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .flashcard:active { transform: scale(0.98); }
+        .fc-front { font-size: 2.5rem; font-weight: bold; color: var(--text-dark); word-wrap: break-word; }
+        .fc-divider { width: 80%; border: 1px dashed #ccc; margin: 20px auto; display: none; }
+        .fc-back { font-size: 2.5rem; color: var(--primary-blue); display: none; word-wrap: break-word; font-weight: bold;}
 
         footer { background-color: var(--white); padding: 20px; text-align: center; font-size: 0.85rem; color: var(--text-gray); border-top: 1px solid #eee; }
         footer p { margin: 5px 0; }
@@ -197,7 +219,7 @@
                         </label>
                         <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                     </div>
-                    <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;"><i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...</p>
+                    <p id="ocrStatus" style="font-size: 0.85rem; color: var(--warning); margin: 5px 0; display: none;"><i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...</p>
                     <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
                 </div>
 
@@ -255,6 +277,7 @@
             <!-- หน้าตั้งค่าการฝึก -->
             <div class="card" id="trainSetupCard">
                 <h3 style="margin-top: 0; color: var(--primary-blue); text-align: center;"><i class="fas fa-cogs"></i> Training Setup</h3>
+                
                 <div class="train-setting-group">
                     <label>Select Level:</label>
                     <select id="trainLevel">
@@ -264,18 +287,26 @@
                         <option value="4">Level 4 (B1-B2 Vocabulary)</option>
                     </select>
                 </div>
+                
                 <div class="train-setting-group">
                     <label>Practice Mode:</label>
                     <select id="trainType">
-                        <option value="readBraille">Read Braille -> Type English</option>
-                        <option value="readEng">Read English -> Type Braille</option>
+                        <optgroup label="Flashcards (Review)">
+                            <option value="flashcardEB">Flashcard: Read English -> See Braille</option>
+                            <option value="flashcardBE">Flashcard: Read Braille -> See English</option>
+                        </optgroup>
+                        <optgroup label="Typing Practice (Test)">
+                            <option value="readBraille">Read Braille -> Type English</option>
+                            <option value="readEng">Read English -> Type Braille</option>
+                        </optgroup>
                     </select>
                 </div>
+                
                 <div class="train-setting-group">
-                    <label>Number of Questions:</label>
+                    <label>Number of Words/Cards:</label>
                     <input type="number" id="trainCount" value="10" min="1" max="50">
                 </div>
-                <button class="btn-action" id="btnStartTrain" style="margin-top: 10px;">Start Practice</button>
+                <button class="btn-action" id="btnStartTrain" style="margin-top: 10px;">Start</button>
             </div>
 
             <!-- หน้ากำลังทำแบบฝึกหัด -->
@@ -286,55 +317,70 @@
                 </div>
                 <div class="progress-bar"><div class="progress-fill" id="trainProgressFill"></div></div>
                 
-                <!-- ตัวโจทย์ -->
-                <div id="trainQuestionDisplay">Target</div>
-
-                <!-- ช่องตอบกรณีพิมพ์อังกฤษ -->
-                <div id="trainEngInputArea" style="display: none; margin-bottom: 20px;">
-                    <input type="text" id="trainEngInput" placeholder="Type answer here..." style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid var(--primary-blue); font-size: 1.2rem; box-sizing: border-box; text-align: center;" autocomplete="off">
+                <!-- 1) โหมด Flashcard (โชว์/ซ่อนคำตอบ) -->
+                <div id="trainFlashcardArea" style="display: none; margin-bottom: 20px;">
+                    <div class="flashcard" id="flashcardBox" title="Click to flip">
+                        <div class="fc-front" id="fcFront">Front</div>
+                        <hr class="fc-divider" id="fcDivider">
+                        <div class="fc-back" id="fcBack">Back</div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-action" id="btnFcFlip" style="background: var(--warning);">Flip Card <i class="fas fa-undo"></i></button>
+                        <button class="btn-action" id="btnFcNext" style="display: none; background: var(--success);">Next Card <i class="fas fa-arrow-right"></i></button>
+                    </div>
                 </div>
 
-                <!-- ช่องตอบกรณีพิมพ์เบรลล์ -->
-                <div id="trainBrailleInputArea" style="display: none; margin-bottom: 20px;">
-                    <div style="text-align: center; min-height: 50px; border: 2px dashed #ddd; border-radius: 8px; font-size: 2rem; padding: 10px; margin-bottom: 15px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace;" id="trainBrailleDisplay"></div>
-                    
-                    <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
-                            <button class="dot-btn train-dot" data-dot="1"></button> <button class="dot-btn train-dot" data-dot="4"></button>
-                            <button class="dot-btn train-dot" data-dot="2"></button> <button class="dot-btn train-dot" data-dot="5"></button>
-                            <button class="dot-btn train-dot" data-dot="3"></button> <button class="dot-btn train-dot" data-dot="6"></button>
+                <!-- 2) โหมดโจทย์พิมพ์ตอบ -->
+                <div id="trainInputModesArea" style="display: none;">
+                    <div id="trainQuestionDisplay">Target</div>
+
+                    <!-- ช่องตอบกรณีพิมพ์อังกฤษ -->
+                    <div id="trainEngInputArea" style="display: none; margin-bottom: 20px;">
+                        <input type="text" id="trainEngInput" placeholder="Type answer here..." style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid var(--primary-blue); font-size: 1.2rem; box-sizing: border-box; text-align: center;" autocomplete="off">
+                    </div>
+
+                    <!-- ช่องตอบกรณีพิมพ์เบรลล์ -->
+                    <div id="trainBrailleInputArea" style="display: none; margin-bottom: 20px;">
+                        <div style="text-align: center; min-height: 50px; border: 2px dashed #ddd; border-radius: 8px; font-size: 2rem; padding: 10px; margin-bottom: 15px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace;" id="trainBrailleDisplay"></div>
+                        
+                        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
+                                <button class="dot-btn train-dot" data-dot="1"></button> <button class="dot-btn train-dot" data-dot="4"></button>
+                                <button class="dot-btn train-dot" data-dot="2"></button> <button class="dot-btn train-dot" data-dot="5"></button>
+                                <button class="dot-btn train-dot" data-dot="3"></button> <button class="dot-btn train-dot" data-dot="6"></button>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                            <button class="ctrl-btn" id="btnTrainAdd">Add</button>
+                            <button class="ctrl-btn" id="btnTrainSpace">Space</button>
+                            <button class="ctrl-btn" id="btnTrainBksp">Bksp</button>
                         </div>
                     </div>
-                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
-                        <button class="ctrl-btn" id="btnTrainAdd">Add</button>
-                        <button class="ctrl-btn" id="btnTrainSpace">Space</button>
-                        <button class="ctrl-btn" id="btnTrainBksp">Bksp</button>
-                    </div>
-                </div>
 
-                <button class="btn-action" id="btnTrainSubmit">Submit Answer</button>
+                    <button class="btn-action" id="btnTrainSubmit">Submit Answer</button>
+                </div>
             </div>
 
             <!-- หน้าสรุปผล -->
             <div class="card" id="trainResultCard" style="display: none;">
-                <h2 style="text-align: center; color: var(--primary-blue); margin-top: 0;">Practice Complete!</h2>
+                <h2 style="text-align: center; color: var(--primary-blue); margin-top: 0;">Session Complete!</h2>
                 <div style="text-align: center; font-size: 4rem; font-weight: bold; margin: 10px 0;" id="finalScoreDisplay">8/10</div>
-                <p style="text-align: center; font-weight: 600; color: var(--text-gray);" id="finalScoreMessage">Great Job!</p>
+                <p style="text-align: center; font-weight: 600; color: var(--text-gray); font-size:1.2rem;" id="finalScoreMessage">Great Job!</p>
                 
                 <div style="overflow-x: auto;">
                     <table class="result-table" id="resultTable">
                         <thead>
                             <tr>
-                                <th>Word</th>
-                                <th>Your Answer</th>
-                                <th>Result</th>
+                                <th id="resTh1">Word</th>
+                                <th id="resTh2">Your Answer</th>
+                                <th id="resTh3">Result</th>
                             </tr>
                         </thead>
                         <tbody id="resultTableBody"></tbody>
                     </table>
                 </div>
 
-                <button class="btn-action" id="btnTrainRestart" style="margin-top: 20px;">Play Again</button>
+                <button class="btn-action" id="btnTrainRestart" style="margin-top: 20px;">Play Again / Menu</button>
             </div>
 
         </div>
@@ -616,13 +662,13 @@
         });
 
         // ==========================================
-        // 5. Training Mode Logic
+        // 5. Training & Flashcard Logic
         // ==========================================
         let trainQuestions = [];
         let trainCurrentIndex = 0;
         let trainScore = 0;
         let trainResultsLog = [];
-        let currentTrainMode = "readBraille"; // readBraille or readEng
+        let currentTrainMode = "readBraille"; 
         let trainBrailleInputRaw = "";
 
         const btnStartTrain = document.getElementById('btnStartTrain');
@@ -662,45 +708,96 @@
             document.getElementById('trainSetupCard').style.display = 'none';
             document.getElementById('trainActiveCard').style.display = 'block';
             
-            if(currentTrainMode === 'readBraille') {
-                document.getElementById('trainEngInputArea').style.display = 'block';
-                document.getElementById('trainBrailleInputArea').style.display = 'none';
+            // Layout Toggle based on Mode
+            if(currentTrainMode.includes('flashcard')) {
+                document.getElementById('trainInputModesArea').style.display = 'none';
+                document.getElementById('trainFlashcardArea').style.display = 'block';
             } else {
-                document.getElementById('trainEngInputArea').style.display = 'none';
-                document.getElementById('trainBrailleInputArea').style.display = 'block';
+                document.getElementById('trainFlashcardArea').style.display = 'none';
+                document.getElementById('trainInputModesArea').style.display = 'block';
+                if(currentTrainMode === 'readBraille') {
+                    document.getElementById('trainEngInputArea').style.display = 'block';
+                    document.getElementById('trainBrailleInputArea').style.display = 'none';
+                } else {
+                    document.getElementById('trainEngInputArea').style.display = 'none';
+                    document.getElementById('trainBrailleInputArea').style.display = 'block';
+                }
             }
             
             loadTrainQuestion();
         });
 
         function loadTrainQuestion() {
-            document.getElementById('trainProgressText').innerText = `Question ${trainCurrentIndex + 1} / ${trainQuestions.length}`;
-            document.getElementById('trainScoreText').innerText = `Score: ${trainScore}`;
-            document.getElementById('trainProgressFill').style.width = `${(trainCurrentIndex / trainQuestions.length) * 100}%`;
+            let totalQ = trainQuestions.length;
+            document.getElementById('trainProgressText').innerText = currentTrainMode.includes('flashcard') 
+                ? `Card ${trainCurrentIndex + 1} / ${totalQ}` 
+                : `Question ${trainCurrentIndex + 1} / ${totalQ}`;
+            
+            document.getElementById('trainScoreText').innerText = currentTrainMode.includes('flashcard') ? "" : `Score: ${trainScore}`;
+            document.getElementById('trainProgressFill').style.width = `${(trainCurrentIndex / totalQ) * 100}%`;
             
             let targetWord = trainQuestions[trainCurrentIndex];
             
-            if(currentTrainMode === 'readBraille') {
-                // Show Braille, user types English
-                document.getElementById('trainQuestionDisplay').style.fontFamily = "'Apple Braille', 'Segoe UI Historic', monospace";
-                document.getElementById('trainQuestionDisplay').innerText = textToBrailleStr(targetWord);
-                document.getElementById('trainEngInput').value = "";
-                document.getElementById('trainEngInput').focus();
+            if(currentTrainMode.includes('flashcard')) {
+                // Setup Flashcard
+                document.getElementById('fcDivider').style.display = 'none';
+                document.getElementById('fcBack').style.display = 'none';
+                document.getElementById('btnFcFlip').style.display = 'block';
+                document.getElementById('btnFcNext').style.display = 'none';
+
+                if(currentTrainMode === 'flashcardEB') {
+                    document.getElementById('fcFront').style.fontFamily = "'Prompt', sans-serif";
+                    document.getElementById('fcFront').innerText = targetWord;
+                    document.getElementById('fcBack').style.fontFamily = "'Apple Braille', 'Segoe UI Historic', monospace";
+                    document.getElementById('fcBack').innerText = textToBrailleStr(targetWord);
+                } else {
+                    document.getElementById('fcFront').style.fontFamily = "'Apple Braille', 'Segoe UI Historic', monospace";
+                    document.getElementById('fcFront').innerText = textToBrailleStr(targetWord);
+                    document.getElementById('fcBack').style.fontFamily = "'Prompt', sans-serif";
+                    document.getElementById('fcBack').innerText = targetWord;
+                }
             } else {
-                // Show English, user types Braille
-                document.getElementById('trainQuestionDisplay').style.fontFamily = "'Prompt', sans-serif";
-                document.getElementById('trainQuestionDisplay').innerText = targetWord;
-                trainBrailleInputRaw = "";
-                updateTrainBrailleDisplay();
-                clearDots('#trainBrailleInputArea');
+                // Setup Typing Practice
+                if(currentTrainMode === 'readBraille') {
+                    document.getElementById('trainQuestionDisplay').style.fontFamily = "'Apple Braille', 'Segoe UI Historic', monospace";
+                    document.getElementById('trainQuestionDisplay').innerText = textToBrailleStr(targetWord);
+                    document.getElementById('trainEngInput').value = "";
+                    document.getElementById('trainEngInput').focus();
+                } else {
+                    document.getElementById('trainQuestionDisplay').style.fontFamily = "'Prompt', sans-serif";
+                    document.getElementById('trainQuestionDisplay').innerText = targetWord;
+                    trainBrailleInputRaw = "";
+                    updateTrainBrailleDisplay();
+                    clearDots('#trainBrailleInputArea');
+                }
             }
         }
 
-        // Allow pressing Enter in input field
+        // Flashcard Interactions
+        function flipCard() {
+            if(document.getElementById('fcBack').style.display === 'none') {
+                document.getElementById('fcDivider').style.display = 'block';
+                document.getElementById('fcBack').style.display = 'block';
+                document.getElementById('btnFcFlip').style.display = 'none';
+                document.getElementById('btnFcNext').style.display = 'block';
+            }
+        }
+        document.getElementById('btnFcFlip').addEventListener('click', flipCard);
+        document.getElementById('flashcardBox').addEventListener('click', flipCard);
+
+        document.getElementById('btnFcNext').addEventListener('click', () => {
+            trainResultsLog.push({ word: trainQuestions[trainCurrentIndex], isFlashcard: true });
+            trainCurrentIndex++;
+            if(trainCurrentIndex < trainQuestions.length) loadTrainQuestion();
+            else showTrainResults();
+        });
+
+        // Allow pressing Enter in input field for Typing Mode
         document.getElementById('trainEngInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') btnTrainSubmit.click();
         });
 
+        // Typing Mode Submit
         btnTrainSubmit.addEventListener('click', () => {
             let targetWord = trainQuestions[trainCurrentIndex];
             let isCorrect = false;
@@ -727,48 +824,76 @@
             });
 
             trainCurrentIndex++;
-            if(trainCurrentIndex < trainQuestions.length) {
-                loadTrainQuestion();
-            } else {
-                showTrainResults();
-            }
+            if(trainCurrentIndex < trainQuestions.length) loadTrainQuestion();
+            else showTrainResults();
         });
 
+        // Show Final Results
         function showTrainResults() {
             document.getElementById('trainActiveCard').style.display = 'none';
             document.getElementById('trainResultCard').style.display = 'block';
             
-            document.getElementById('finalScoreDisplay').innerText = `${trainScore}/${trainQuestions.length}`;
-            let ratio = trainScore / trainQuestions.length;
-            let msg = ratio >= 0.8 ? "Excellent! Keep it up! 🏆" : (ratio >= 0.5 ? "Good job! 👏" : "Keep practicing! 💪");
-            document.getElementById('finalScoreMessage').innerText = msg;
-
             let tbody = document.getElementById('resultTableBody');
             tbody.innerHTML = "";
-            
-            trainResultsLog.forEach(log => {
-                let tr = document.createElement('tr');
+
+            if(currentTrainMode.includes('flashcard')) {
+                // Flashcard Result Display
+                document.getElementById('finalScoreDisplay').style.display = 'none';
+                document.getElementById('finalScoreMessage').innerText = "Flashcard Review Completed! 🌟";
                 
-                let tdWord = document.createElement('td');
-                // แสดงคำเป้าหมายให้ชัดเจนขึ้นอยู่กับโหมด
-                tdWord.innerHTML = currentTrainMode === 'readBraille' ? `<span style="font-family:'Apple Braille', monospace; font-size:1.5rem;">${textToBrailleStr(log.word)}</span><br><small>(${log.word})</small>` : `<b>${log.word}</b>`;
-                
-                let tdAns = document.createElement('td');
-                if(currentTrainMode === 'readEng') tdAns.style.fontFamily = "'Apple Braille', monospace";
-                tdAns.style.fontSize = currentTrainMode === 'readEng' ? "1.5rem" : "1rem";
-                
-                if(log.isCorrect) {
-                    tdAns.innerHTML = `<span class="text-success">${log.user} <i class="fas fa-check-circle"></i></span>`;
-                } else {
-                    tdAns.innerHTML = `<span class="text-danger" style="text-decoration: line-through;">${log.user}</span><br><span class="text-success">${log.correct}</span>`;
-                }
-                
-                let tdRes = document.createElement('td');
-                tdRes.innerHTML = log.isCorrect ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
-                
-                tr.appendChild(tdWord); tr.appendChild(tdAns); tr.appendChild(tdRes);
-                tbody.appendChild(tr);
-            });
+                document.getElementById('resTh1').innerText = "English Word";
+                document.getElementById('resTh2').innerText = "Braille";
+                document.getElementById('resTh3').style.display = 'none';
+
+                trainResultsLog.forEach(log => {
+                    let tr = document.createElement('tr');
+                    let tdWord = document.createElement('td');
+                    tdWord.innerHTML = `<b>${log.word}</b>`;
+                    
+                    let tdBraille = document.createElement('td');
+                    tdBraille.style.fontFamily = "'Apple Braille', monospace";
+                    tdBraille.style.fontSize = "1.5rem";
+                    tdBraille.style.color = "var(--primary-blue)";
+                    tdBraille.innerText = textToBrailleStr(log.word);
+                    
+                    tr.appendChild(tdWord); tr.appendChild(tdBraille);
+                    tbody.appendChild(tr);
+                });
+            } else {
+                // Typing Test Result Display
+                document.getElementById('finalScoreDisplay').style.display = 'block';
+                document.getElementById('resTh3').style.display = 'table-cell';
+                document.getElementById('resTh1').innerText = "Word";
+                document.getElementById('resTh2').innerText = "Your Answer";
+                document.getElementById('resTh3').innerText = "Result";
+
+                document.getElementById('finalScoreDisplay').innerText = `${trainScore}/${trainQuestions.length}`;
+                let ratio = trainScore / trainQuestions.length;
+                let msg = ratio >= 0.8 ? "Excellent! Keep it up! 🏆" : (ratio >= 0.5 ? "Good job! 👏" : "Keep practicing! 💪");
+                document.getElementById('finalScoreMessage').innerText = msg;
+
+                trainResultsLog.forEach(log => {
+                    let tr = document.createElement('tr');
+                    let tdWord = document.createElement('td');
+                    tdWord.innerHTML = currentTrainMode === 'readBraille' ? `<span style="font-family:'Apple Braille', monospace; font-size:1.5rem;">${textToBrailleStr(log.word)}</span><br><small>(${log.word})</small>` : `<b>${log.word}</b>`;
+                    
+                    let tdAns = document.createElement('td');
+                    if(currentTrainMode === 'readEng') tdAns.style.fontFamily = "'Apple Braille', monospace";
+                    tdAns.style.fontSize = currentTrainMode === 'readEng' ? "1.5rem" : "1rem";
+                    
+                    if(log.isCorrect) {
+                        tdAns.innerHTML = `<span class="text-success">${log.user} <i class="fas fa-check-circle"></i></span>`;
+                    } else {
+                        tdAns.innerHTML = `<span class="text-danger" style="text-decoration: line-through;">${log.user}</span><br><span class="text-success">${log.correct}</span>`;
+                    }
+                    
+                    let tdRes = document.createElement('td');
+                    tdRes.innerHTML = log.isCorrect ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+                    
+                    tr.appendChild(tdWord); tr.appendChild(tdAns); tr.appendChild(tdRes);
+                    tbody.appendChild(tr);
+                });
+            }
         }
 
         btnTrainRestart.addEventListener('click', () => {

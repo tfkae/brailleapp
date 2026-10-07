@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Braille Translator (Thai & Eng)</title>
+    <title>Braille Translator (Standard TH/EN)</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -31,7 +31,7 @@
             user-select: none;
         }
 
-        textarea, input, #resultOutput {
+        textarea, input, #resultOutput, select {
             -webkit-user-select: text;
             user-select: text;
         }
@@ -44,10 +44,7 @@
             box-shadow: var(--shadow);
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
+        header h1 { margin: 0; font-size: 1.5rem; }
 
         main {
             flex: 1;
@@ -110,8 +107,6 @@
             border-top: 1px solid #eee;
         }
 
-        footer p { margin: 5px 0; }
-
         .dot-btn {
             width: 50px;
             height: 50px;
@@ -121,9 +116,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .dot-btn.active {
-            background-color: var(--primary-blue);
-        }
+        .dot-btn.active { background-color: var(--primary-blue); }
         
         .ctrl-btn {
             background: var(--light-blue);
@@ -134,61 +127,22 @@
             cursor: pointer;
             font-size: 0.9rem;
         }
-        .ctrl-btn:hover {
-            background: var(--primary-blue);
-            color: white;
-        }
+        .ctrl-btn:hover { background: var(--primary-blue); color: white; }
         
-        #resultOutput.mirror-mode .interlinear-container {
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-        
-        #resultOutput.mirror-mode .interlinear-braille {
-            transform: scaleX(-1);
-        }
-        
+        #resultOutput.mirror-mode .interlinear-container { flex-direction: row-reverse; justify-content: flex-end; }
+        #resultOutput.mirror-mode .interlinear-braille { transform: scaleX(-1); }
         #resultOutput.mirror-mode .normal-braille-text {
-             display: block;
-             transform: scaleX(-1);
-             text-align: left;
-             direction: rtl;
-             unicode-bidi: bidi-override;
+             display: block; transform: scaleX(-1); text-align: left; direction: rtl; unicode-bidi: bidi-override;
         }
 
         #resultOutput {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #eee;
+            max-height: 300px; overflow-y: auto; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px solid #eee;
         }
 
-        .interlinear-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            line-height: 1.2;
-            margin-bottom: 15px;
-        }
-        .interlinear-char {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 22px;
-        }
-        .interlinear-braille {
-            font-size: 1.6rem;
-            font-family: 'Apple Braille', 'Segoe UI Historic', monospace;
-            color: var(--text-dark);
-        }
-        .interlinear-eng {
-            font-size: 1.1rem;
-            color: var(--primary-blue);
-            font-weight: bold;
-            font-family: 'Prompt', monospace;
-        }
+        .interlinear-container { display: flex; flex-wrap: wrap; gap: 4px; line-height: 1.2; margin-bottom: 15px; }
+        .interlinear-char { display: flex; flex-direction: column; align-items: center; min-width: 22px; }
+        .interlinear-braille { font-size: 1.6rem; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; color: var(--text-dark); }
+        .interlinear-eng { font-size: 1rem; color: var(--primary-blue); font-weight: bold; font-family: 'Prompt', monospace; text-align: center; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
@@ -214,11 +168,7 @@
                     </label>
                     <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                 </div>
-                
-                <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...
-                </p>
-                
+                <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;"><i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...</p>
                 <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
             </div>
 
@@ -231,43 +181,42 @@
                     </label>
                     <input type="file" id="brailleImageUpload" accept="image/*" style="display: none;">
                 </div>
-            
-                <p id="brailleOcrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: -5px 0 15px 0; display: none; text-align: center;">
-                    <i class="fas fa-spinner fa-spin"></i> Connecting to Cloud AI...
-                </p>
+                <p id="brailleOcrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: -5px 0 15px 0; display: none; text-align: center;"><i class="fas fa-spinner fa-spin"></i> Connecting to Cloud AI...</p>
             </div>
 
             <div id="brailleKeyboard" style="display: none; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
-                        <button class="dot-btn" data-dot="1"></button>
-                        <button class="dot-btn" data-dot="4"></button>
-                        <button class="dot-btn" data-dot="2"></button>
-                        <button class="dot-btn" data-dot="5"></button>
-                        <button class="dot-btn" data-dot="3"></button>
-                        <button class="dot-btn" data-dot="6"></button>
+                        <button class="dot-btn" data-dot="1"></button><button class="dot-btn" data-dot="4"></button>
+                        <button class="dot-btn" data-dot="2"></button><button class="dot-btn" data-dot="5"></button>
+                        <button class="dot-btn" data-dot="3"></button><button class="dot-btn" data-dot="6"></button>
                     </div>
                 </div>
-                
                 <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
                     <button class="ctrl-btn" id="btnAddBraille">Add</button>
                     <button class="ctrl-btn" id="btnSpace">Space</button>
                     <button class="ctrl-btn" id="btnEnter">Enter</button>
                     <button class="ctrl-btn" id="btnBackspace">Bksp</button>
                 </div>
-                
                 <div style="margin-top: 15px; text-align: left;">
                     <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-gray);">Your Braille Input:</p>
                     <div id="brailleInputDisplay" style="min-height: 40px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word;"></div>
                 </div>
             </div>
 
+            <!-- กล่องเลือกภาษาขาออก (แสดงเฉพาะโหมดเบรลล์เป็นข้อความ) -->
+            <div id="b2eOptions" style="display: none; margin-top: 15px; text-align: center;">
+                <label style="font-weight: 600; color: var(--text-dark); font-size: 0.95rem;">Output Language: </label>
+                <select id="outputLanguage" style="padding: 8px; border-radius: 5px; border: 1px solid var(--primary-blue); font-family: 'Prompt'; font-size: 0.95rem;">
+                    <option value="th">Thai (อักษรไทย)</option>
+                    <option value="en">English (ภาษาอังกฤษ)</option>
+                </select>
+            </div>
+
             <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
                 <label style="font-size: 0.95rem; color: var(--text-dark); cursor: pointer; font-weight: 600;">
-                    <input type="checkbox" id="chkInterlinear" style="transform: scale(1.2); margin-right: 5px;"> 
-                    Parallel View (แสดงผลอักษรขนานบน-ล่าง)
+                    <input type="checkbox" id="chkInterlinear" style="transform: scale(1.2); margin-right: 5px;"> Parallel View
                 </label>
-                
                 <button id="btnTranslate" style="background:var(--primary-blue); color:white; border:none; padding:10px 40px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; box-shadow: var(--shadow);">
                     Translate
                 </button>
@@ -283,51 +232,38 @@
             </div>
             <div id="resultOutput" style="font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word; line-height: 1.8;"></div>
         </div>
-
     </main>
 
     <footer>
         <p>This application developed by CUEE Thanabodee Kaewchai is a part of Design Thinking Course in 2026.</p>
         <p>Contact the developer: <a href="mailto:f.kaewchai@gmail.com" style="color:var(--primary-blue); text-decoration:none;">f.kaewchai@gmail.com</a></p>
-        <p>&copy; 2026 Thanabodee Kaewchai</p>
     </footer>
 
     <script>
-        // พจนานุกรม อังกฤษ + ไทย
-        const brailleDict = {
-            // English
-            'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
-            'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
-            'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',
-            '1': '⠁', '2': '⠃', '3': '⠉', '4': '⠙', '5': '⠑', '6': '⠋', '7': '⠛', '8': '⠓', '9': '⠊', '0': '⠚',
-            ',': '⠂', ';': '⠆', ':': '⠒', '.': '⠲', '!': '⠖', '(': '⠦', ')': '⠴', '?': '⠢', '"': '⠦', "'": '⠄', '-': '⠤',
-            ' ': '⠀',
-            // Thai Consonants
-            'ก': '⠅', 'ข': '⠨', 'ฃ': '⠨', 'ค': '⠩', 'ฅ': '⠩', 'ฆ': '⠩', 'ง': '⠬', 'จ': '⠡', 'ฉ': '⠟', 'ช': '⠱', 
-            'ซ': '⠎', 'ฌ': '⠱', 'ญ': '⠚', 'ฎ': '⠙', 'ฏ': '⠞', 'ฐ': '⠹', 'ฑ': '⠮', 'ฒ': '⠮', 'ณ': '⠝', 'ด': '⠙', 
-            'ต': '⠞', 'ถ': '⠹', 'ท': '⠮', 'ธ': '⠮', 'น': '⠝', 'บ': '⠃', 'ป': '⠏', 'ผ': '⠯', 'ฝ': '⠻', 'พ': '⠯', 
-            'ฟ': '⠋', 'ภ': '⠯', 'ม': '⠍', 'ย': '⠽', 'ร': '⠗', 'ล': '⠇', 'ว': '⠺', 'ศ': '⠎', 'ษ': '⠎', 'ส': '⠎', 
-            'ห': '⠓', 'ฬ': '⠇', 'อ': '⠕', 'ฮ': '⠓',
-            // Thai Vowels
-            'ะ': '⠁', 'า': '⠜', 'ิ': '⠊', 'ี': '⠣', 'ึ': '⠪', 'ื': '⠳', 'ุ': '⠥', 'ู': '⠶', 
-            'เ': '⠑', 'แ': '⠣', 'โ': '⠕', 'ใ': '⠔', 'ไ': '⠌', 'ำ': '⠡',
-            // Thai Tones & Marks
-            '่': '⠈', '้': '⠘', '๊': '⠈', '๋': '⠨', '์': '⠐', '็': '⠢', 'ๆ': '⠂'
+        // ==========================================
+        // 1. พจนานุกรมอ้างอิงตามมาตรฐานสมาคมคนตาบอดฯ
+        // ==========================================
+        const thChar2Br = {
+            'ก':'⠅', 'ข':'⠣', 'ฃ':'⠣', 'ค':'⠫', 'ฅ':'⠫', 'ฆ':'⠫', 'ง':'⠝', 'จ':'⠓', 'ฉ':'⠛', 'ช':'⠱', 'ซ':'⠎', 'ฌ':'⠱', 'ญ':'⠚', 'ฎ':'⠙', 'ฏ':'⠞', 'ฐ':'⠹', 'ฑ':'⠮', 'ฒ':'⠮', 'ณ':'⠝', 'ด':'⠙', 'ต':'⠞', 'ถ':'⠹', 'ท':'⠮', 'ธ':'⠮', 'น':'⠝', 'บ':'⠃', 'ป':'⠏', 'ผ':'⠯', 'ฝ':'⠋', 'พ':'⠯', 'ฟ':'⠋', 'ภ':'⠯', 'ม':'⠍', 'ย':'⠽', 'ร':'⠗', 'ล':'⠇', 'ว':'⠺', 'ศ':'⠎', 'ษ':'⠎', 'ส':'⠎', 'ห':'⠳', 'ฬ':'⠇', 'อ':'⠕', 'ฮ':'⠳',
+            'ะ':'⠁', 'า':'⠜', 'ิ':'⠊', 'ี':'⠣', 'ึ':'⠬', 'ื':'⠳', 'ุ':'⠥', 'ู':'⠷',
+            'เ':'⠑', 'แ':'⠟', 'โ':'⠽', 'ใ':'⠙', 'ไ':'⠌', 'ำ':'⠹',
+            '่':'⠈', '้':'⠘', '๊':'⠨', '๋':'⠸', '์':'⠐', '็':'⠰', 'ๆ':'⠂'
         };
 
-        const numSign = '⠼';
-        const capSign = '⠠';
+        const enChar2Br = {
+            'a':'⠁', 'b':'⠃', 'c':'⠉', 'd':'⠙', 'e':'⠑', 'f':'⠋', 'g':'⠛', 'h':'⠓', 'i':'⠊', 'j':'⠚', 'k':'⠅', 'l':'⠇', 'm':'⠍', 'n':'⠝', 'o':'⠕', 'p':'⠏', 'q':'⠟', 'r':'⠗', 's':'⠎', 't':'⠞', 'u':'⠥', 'v':'⠧', 'w':'⠺', 'x':'⠭', 'y':'⠽', 'z':'⠵'
+        };
 
-        const reverseBrailleDict = {};
-        for (let key in brailleDict) {
-            // ป้องกันการทับซ้อน (เนื่องจากเบรลล์บางตัวใช้ร่วมกัน) เราจะให้ความสำคัญกับภาษาที่สแกนเจอเป็นหลัก
-            // สำหรับต้นแบบนี้ จะแมปกลับเป็นไทยตัวแรกที่เจอ
-            if (!reverseBrailleDict[brailleDict[key]]) {
-                reverseBrailleDict[brailleDict[key]] = key;
-            }
-        }
-        // ปรับแก้เฉพาะตัวที่ใช้บ่อยให้อ่านกลับมาเป็นภาษาอังกฤษพื้นฐานได้ด้วยถ้าอยู่ในบริบทตัวเลข
-        const numMap = {'⠁':'1','⠃':'2','⠉':'3','⠙':'4','⠑':'5','⠋':'6','⠛':'7','⠓':'8','⠊':'9','⠚':'0'};
+        const num2Br = { '1':'⠁', '2':'⠃', '3':'⠉', '4':'⠙', '5':'⠑', '6':'⠋', '7':'⠛', '8':'⠓', '9':'⠊', '0':'⠚' };
+        const punct2Br = { ',':'⠂', ';':'⠆', ':':'⠒', '.':'⠲', '!':'⠖', '?':'⠦', ' ':'⠀', '-': '⠤', '"': '⠦', "'": '⠄', '(': '⠦', ')': '⠴' };
+
+        // แปลงกลับเป็นไทย (แสดงตัวทับซ้อนเพื่อความสมจริงของระบบเบรลล์)
+        const br2ThAmbiguous = {
+            '⠅':'ก', '⠣':'(ข/ี)', '⠫':'ค', '⠝':'(น/ง)', '⠓':'จ', '⠛':'ฉ', '⠱':'ช', '⠎':'ส', '⠚':'ญ', '⠙':'(ด/ใ)', '⠞':'ต', '⠹':'(ถ/ำ)', '⠮':'ท', '⠃':'บ', '⠏':'ป', '⠯':'(พ/ผ/ภ/ือ)', '⠋':'ฟ', '⠍':'ม', '⠽':'(ย/โ)', '⠗':'ร', '⠇':'ล', '⠺':'ว', '⠳':'(ห/ื)', '⠕':'อ',
+            '⠁':'ะ', '⠜':'า', '⠊':'ิ', '⠬':'ึ', '⠥':'ุ', '⠷':'ู', '⠑':'เ', '⠟':'แ', '⠌':'ไ',
+            '⠩':'(เ-ีย)', '⠿':'(-ัว)', '⠻':'(เ-อ)', '⠆':'(เ-า)', '⠪':'(-อ)',
+            '⠈':'่', '⠘':'้', '⠨':'๊', '⠸':'๋', '⠐':'์', '⠰':'็', '⠂':'ๆ'
+        };
 
         let currentMode = 'E2B';
         let brailleInputRaw = "";
@@ -343,91 +279,58 @@
         const btnMirror = document.getElementById('btnMirror');
         const brailleInputDisplay = document.getElementById('brailleInputDisplay');
         const dotBtns = document.querySelectorAll('.dot-btn');
-
         const ocrSection = document.getElementById('ocrSection');
         const brailleOcrSection = document.getElementById('brailleOcrSection');
+        const b2eOptions = document.getElementById('b2eOptions');
+        const outputLanguage = document.getElementById('outputLanguage');
 
+        // ==========================================
+        // 2. ระบบ UI และ คีย์บอร์ด
+        // ==========================================
         btnE2B.addEventListener('click', () => {
             currentMode = 'E2B';
-            btnE2B.classList.add('active');
-            btnB2E.classList.remove('active');
-            
-            mainInput.style.display = 'block';
-            brailleKeyboard.style.display = 'none';
-            ocrSection.style.display = 'block';
-            brailleOcrSection.style.display = 'none';
-
+            btnE2B.classList.add('active'); btnB2E.classList.remove('active');
+            mainInput.style.display = 'block'; brailleKeyboard.style.display = 'none';
+            ocrSection.style.display = 'block'; brailleOcrSection.style.display = 'none';
+            b2eOptions.style.display = 'none'; // ซ่อนที่เลือกภาษา
             instructionText.innerText = "Enter Thai or English text below:";
             resultArea.style.display = 'none';
         });
 
         btnB2E.addEventListener('click', () => {
             currentMode = 'B2E';
-            btnB2E.classList.add('active');
-            btnE2B.classList.remove('active');
-            
-            mainInput.style.display = 'none';
-            brailleKeyboard.style.display = 'block';
-            ocrSection.style.display = 'none';
-            brailleOcrSection.style.display = 'block';
-
+            btnB2E.classList.add('active'); btnE2B.classList.remove('active');
+            mainInput.style.display = 'none'; brailleKeyboard.style.display = 'block';
+            ocrSection.style.display = 'none'; brailleOcrSection.style.display = 'block';
+            b2eOptions.style.display = 'block'; // โชว์ที่เลือกภาษา
             instructionText.innerText = "Press dots to create a Braille cell, then tap Add:";
-            resultArea.style.display = 'none';
-            updateBrailleDisplay();
+            resultArea.style.display = 'none'; updateBrailleDisplay();
         });
 
-        dotBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.classList.toggle('active');
-            });
-        });
+        dotBtns.forEach(btn => { btn.addEventListener('click', () => { btn.classList.toggle('active'); }); });
 
         function getCellFromDots() {
             let dotMap = [0,0,0,0,0,0,0,0];
-            dotBtns.forEach(btn => {
-                if (btn.classList.contains('active')) {
-                    dotMap[parseInt(btn.getAttribute('data-dot')) - 1] = 1;
-                }
-            });
+            dotBtns.forEach(btn => { if (btn.classList.contains('active')) dotMap[parseInt(btn.getAttribute('data-dot')) - 1] = 1; });
             let base = 0x2800;
             let val = (dotMap[0]<<0) | (dotMap[1]<<1) | (dotMap[2]<<2) | (dotMap[3]<<3) | (dotMap[4]<<4) | (dotMap[5]<<5);
             return String.fromCharCode(base + val);
         }
 
-        function clearDots() {
-            dotBtns.forEach(btn => btn.classList.remove('active'));
-        }
-
-        function updateBrailleDisplay() {
-            brailleInputDisplay.innerText = brailleInputRaw;
-        }
+        function clearDots() { dotBtns.forEach(btn => btn.classList.remove('active')); }
+        function updateBrailleDisplay() { brailleInputDisplay.innerText = brailleInputRaw; }
 
         document.getElementById('btnAddBraille').addEventListener('click', () => {
             let cell = getCellFromDots();
-            if (cell !== String.fromCharCode(0x2800)) {
-                brailleInputRaw += cell;
-                updateBrailleDisplay();
-                clearDots();
-            }
+            if (cell !== String.fromCharCode(0x2800)) { brailleInputRaw += cell; updateBrailleDisplay(); clearDots(); }
         });
+        document.getElementById('btnSpace').addEventListener('click', () => { brailleInputRaw += '⠀'; updateBrailleDisplay(); clearDots(); });
+        document.getElementById('btnEnter').addEventListener('click', () => { brailleInputRaw += '\n'; updateBrailleDisplay(); clearDots(); });
+        document.getElementById('btnBackspace').addEventListener('click', () => { brailleInputRaw = brailleInputRaw.slice(0, -1); updateBrailleDisplay(); });
 
-        document.getElementById('btnSpace').addEventListener('click', () => {
-            brailleInputRaw += '⠀';
-            updateBrailleDisplay();
-            clearDots();
-        });
-
-        document.getElementById('btnEnter').addEventListener('click', () => {
-            brailleInputRaw += '\n';
-            updateBrailleDisplay();
-            clearDots();
-        });
-
-        document.getElementById('btnBackspace').addEventListener('click', () => {
-            brailleInputRaw = brailleInputRaw.slice(0, -1);
-            updateBrailleDisplay();
-        });
-
+        // ==========================================
+        // 3. อัลกอริทึมแปลภาษา (Smart Thai Tokenizer)
+        // ==========================================
         const chkInterlinear = document.getElementById('chkInterlinear');
 
         btnTranslate.addEventListener('click', () => {
@@ -436,116 +339,111 @@
             let outputText = "";
 
             if (currentMode === 'E2B') {
-                btnMirror.style.display = 'block';
-                btnMirror.classList.remove('active');
-                resultOutput.classList.remove('mirror-mode');
+                btnMirror.style.display = 'block'; btnMirror.classList.remove('active'); resultOutput.classList.remove('mirror-mode');
                 
-                // กระบวนการสลับตำแหน่งสระหน้า (เ แ โ ใ ไ) ให้ไปอยู่หลังพยัญชนะตามหลักเบรลล์ไทย
-                let text = mainInput.value.replace(/([เแโใไ])([ก-ฮ])/g, '$2$1');
-                let isNumberMode = false;
+                let text = mainInput.value;
+                let hasThai = /[ก-ฮะ-์]/.test(text);
 
-                if (isInterlinear) {
-                    outputText = '<div class="interlinear-container">';
-                    for (let i = 0; i < text.length; i++) {
-                        let char = text[i];
-                        let bChar = "";
-                        let eChar = char;
-                        
-                        if (char === ' ') { 
-                            bChar = brailleDict[' ']; 
-                            isNumberMode = false;
-                        } else if (char === '\n') { 
-                            outputText += '</div><div class="interlinear-container">'; 
-                            isNumberMode = false;
-                            continue; 
-                        } else if (/[0-9]/.test(char)) {
-                            if (!isNumberMode) {
-                                outputText += `<div class="interlinear-char"><span class="interlinear-braille">${numSign}</span><span class="interlinear-eng"></span></div>`;
-                                isNumberMode = true;
-                            }
-                            bChar = brailleDict[char];
-                        } else {
-                            isNumberMode = false;
-                            if (/[A-Z]/.test(char)) {
-                                outputText += `<div class="interlinear-char"><span class="interlinear-braille">${capSign}</span><span class="interlinear-eng"></span></div>`;
-                            }
-                            bChar = brailleDict[char.toLowerCase()] || brailleDict[char] || char;
-                        }
-                        outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
-                    }
-                    outputText += '</div>';
-                } else {
-                    outputText = '<div class="normal-braille-text">';
-                    for (let i = 0; i < text.length; i++) {
-                        let char = text[i];
-                        if (char === ' ') { outputText += brailleDict[' ']; isNumberMode = false; } 
-                        else if (char === '\n') { outputText += '<br>'; isNumberMode = false; }
-                        else if (/[0-9]/.test(char)) {
-                            if (!isNumberMode) { outputText += numSign; isNumberMode = true; }
-                            outputText += brailleDict[char];
-                        } else {
-                            isNumberMode = false;
-                            if (/[A-Z]/.test(char)) { outputText += capSign; }
-                            outputText += brailleDict[char.toLowerCase()] || brailleDict[char] || char;
-                        }
-                    }
-                    outputText += '</div>';
+                if (hasThai) {
+                    // จัดการสระผสมที่มีเซลล์เฉพาะ และเรียงลำดับวรรณยุกต์ให้ถูกต้อง
+                    text = text.replace(/เ([ก-ฮ][รลว]?)ี([่้๊๋์็]?)ย/g, '$1⠩$2'); // เ-ีย
+                    text = text.replace(/เ([ก-ฮ][รลว]?)ื([่้๊๋์็]?)อ/g, '$1⠯$2'); // เ-ือ
+                    text = text.replace(/เ([ก-ฮ][รลว]?)([่้๊๋์็]?)อ/g, '$1⠻$2');   // เ-อ
+                    text = text.replace(/เ([ก-ฮ][รลว]?)([่้๊๋์็]?)า/g, '$1⠆$2');   // เ-า
+                    text = text.replace(/([ก-ฮ][รลว]?)ั([่้๊๋์็]?)ว/g, '$1⠿$2');   // -ัว
+                    text = text.replace(/([ก-ฮ])อ([ก-ฮ]|$|\s)/g, '$1⠪$2');       // -อ (กรณีทำหน้าที่เป็นสระ)
+                    
+                    // สลับสระหน้า (เ แ โ ใ ไ) ให้ไปอยู่หลังพยัญชนะ
+                    text = text.replace(/([เแโใไ])([ก-ฮ][รลว]?)/g, '$2$1');
                 }
+
+                let isNumberMode = false;
+                outputText = isInterlinear ? '<div class="interlinear-container">' : '<div class="normal-braille-text">';
+
+                for (let i = 0; i < text.length; i++) {
+                    let char = text[i];
+                    let bChar = ""; let eChar = char;
+                    
+                    if (char === ' ') { bChar = '⠀'; isNumberMode = false; }
+                    else if (char === '\n') {
+                        if (isInterlinear) { outputText += '</div><div class="interlinear-container">'; isNumberMode = false; continue; }
+                        else { outputText += '<br>'; isNumberMode = false; continue; }
+                    }
+                    else if (/[0-9]/.test(char)) {
+                        if (!isNumberMode) { bChar = '⠼' + num2Br[char]; isNumberMode = true; }
+                        else { bChar = num2Br[char]; }
+                    }
+                    else if (/[A-Z]/.test(char)) { isNumberMode = false; bChar = '⠠' + (enChar2Br[char.toLowerCase()] || char); }
+                    else if (/[a-z]/.test(char)) { isNumberMode = false; bChar = enChar2Br[char] || char; }
+                    else {
+                        isNumberMode = false;
+                        if (['⠩','⠯','⠻','⠆','⠿','⠪'].includes(char)) {
+                            bChar = char;
+                            eChar = char === '⠩'?'เ-ีย' : char==='⠯'?'เ-ือ' : char==='⠻'?'เ-อ' : char==='⠆'?'เ-า' : char==='⠿'?'-ัว' : '-อ';
+                        } else {
+                            bChar = thChar2Br[char] || punct2Br[char] || char;
+                        }
+                    }
+
+                    if (isInterlinear) {
+                        if (bChar.length > 1) {
+                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar[0]}</span><span class="interlinear-eng"></span></div>`;
+                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar[1]}</span><span class="interlinear-eng">${eChar}</span></div>`;
+                        } else {
+                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
+                        }
+                    } else { outputText += bChar; }
+                }
+                outputText += '</div>';
             } 
             else {
+                // โหมด Braille to Text
                 btnMirror.style.display = 'none';
+                let targetLang = outputLanguage.value;
                 let lines = brailleInputRaw.split('\n');
+                outputText = isInterlinear ? '<div class="interlinear-container">' : '';
 
-                let finalProcessedLines = lines.map(line => {
-                    let translatedLine = "";
+                for (let line of lines) {
+                    let processedLine = "";
                     let isNum = false; let isCap = false;
+
                     for (let char of line) {
-                        if (char === numSign) { isNum = true; } 
-                        else if (char === capSign) { isCap = true; } 
-                        else if (char === '⠀') { translatedLine += ' '; isNum = false; } 
+                        let tChar = "";
+                        if (char === '⠼') { isNum = true; tChar = targetLang === 'en' ? "(num)" : "(เลข)"; }
+                        else if (char === '⠠') { isCap = true; tChar = targetLang === 'en' ? "(cap)" : "(พิมพ์ใหญ่)"; }
+                        else if (char === '⠀') { tChar = " "; isNum = false; }
                         else {
-                            if (isNum && numMap[char]) {
-                                translatedLine += numMap[char];
+                            if (isNum) {
+                                let numMapped = Object.keys(num2Br).find(k => num2Br[k] === char);
+                                tChar = numMapped || "?";
                             } else {
-                                let mapped = reverseBrailleDict[char] || "?";
-                                if (isCap && /[a-z]/.test(mapped)) {
-                                    translatedLine += mapped.toUpperCase(); isCap = false;
+                                if (targetLang === 'th') {
+                                    // โชว์ความกำกวมของเบรลล์ภาษาไทย
+                                    tChar = br2ThAmbiguous[char] || punct2Br[char] || "?";
                                 } else {
-                                    translatedLine += mapped;
+                                    let engMapped = Object.keys(enChar2Br).find(k => enChar2Br[k] === char);
+                                    tChar = engMapped || punct2Br[char] || "?";
+                                    if (isCap && /[a-z]/.test(tChar)) { tChar = tChar.toUpperCase(); isCap = false; }
                                 }
                             }
                         }
+                        if (isInterlinear) {
+                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${char}</span><span class="interlinear-eng" style="font-size:0.85rem;">${tChar}</span></div>`;
+                        } else { processedLine += tChar; }
                     }
-                    // สลับตำแหน่งพยัญชนะกลับมาอยู่หลังสระหน้า (ตามหลักการเขียนภาษาไทยปกติ)
-                    return translatedLine.replace(/([ก-ฮ])([เแโใไ])/g, '$2$1');
-                });
-
-                if (isInterlinear) {
-                    outputText = '<div class="interlinear-container">';
-                    for (let j = 0; j < finalProcessedLines.length; j++) {
-                        let engLineStr = finalProcessedLines[j];
-                        let brailleLineStr = lines[j].replace(new RegExp(numSign, 'g'), '').replace(new RegExp(capSign, 'g'), '');
-                        
-                        // จับคู่ขนาน (อาจจะไม่เป๊ะ 100% ถ้ามีการใส่เครื่องหมายนำหน้า แต่พออ่านได้)
-                        for (let k = 0; k < engLineStr.length; k++) {
-                            let bChar = brailleLineStr[k] || "⠀";
-                            let eChar = engLineStr[k];
-                            outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
-                        }
-                        outputText += '</div><div class="interlinear-container">';
-                    }
-                    outputText += '</div>';
-                } else {
-                    outputText = finalProcessedLines.join('<br>');
+                    if (isInterlinear) outputText += '</div><div class="interlinear-container">';
+                    else outputText += processedLine + '<br>';
                 }
+                if (isInterlinear) outputText += '</div>';
             }
             resultOutput.innerHTML = outputText;
         });
 
-        btnMirror.addEventListener('click', () => {
-            resultOutput.classList.toggle('mirror-mode');
-        });
+        btnMirror.addEventListener('click', () => { resultOutput.classList.toggle('mirror-mode'); });
 
+        // ==========================================
+        // 4. ระบบ OCR อ่านภาพตัวอักษรปกติ
+        // ==========================================
         const imageUpload = document.getElementById('imageUpload');
         const imagePreview = document.getElementById('imagePreview');
         const ocrStatus = document.getElementById('ocrStatus');
@@ -553,61 +451,38 @@
         imageUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const scanLabel = document.querySelector('label[for="imageUpload"]');
-            scanLabel.style.pointerEvents = 'none';
-            scanLabel.style.opacity = '0.6';
+            scanLabel.style.pointerEvents = 'none'; scanLabel.style.opacity = '0.6';
 
             const reader = new FileReader();
-            reader.onload = function(event) {
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = 'block';
-            }
+            reader.onload = function(event) { imagePreview.src = event.target.result; imagePreview.style.display = 'block'; }
             reader.readAsDataURL(file);
 
-            ocrStatus.style.display = 'block';
-            mainInput.value = "Scanning... please wait.";
+            ocrStatus.style.display = 'block'; mainInput.value = "Scanning... please wait.";
 
-            // โหลดภาษาไทย + อังกฤษ เข้าด้วยกัน
-            Tesseract.recognize(
-                file,
-                'tha+eng', 
-                { logger: m => console.log(m) }
-            ).then(({ data: { text } }) => {
-                scanLabel.style.pointerEvents = 'auto';
-                scanLabel.style.opacity = '1';
-                ocrStatus.style.display = 'none';
-                
+            Tesseract.recognize(file, 'tha+eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
+                scanLabel.style.pointerEvents = 'auto'; scanLabel.style.opacity = '1'; ocrStatus.style.display = 'none';
                 let cleanedText = text.replace(/\n\s*\n/g, '\n').trim();
-                
-                if (cleanedText === "") {
-                    mainInput.value = "Could not detect any text in this image.";
-                } else {
-                    mainInput.value = cleanedText;
-                }
+                mainInput.value = cleanedText === "" ? "Could not detect any text in this image." : cleanedText;
             }).catch(err => {
-                scanLabel.style.pointerEvents = 'auto';
-                scanLabel.style.opacity = '1';
-                console.error(err);
-                ocrStatus.style.display = 'none';
-                mainInput.value = "Error scanning image. Please try typing instead.";
+                scanLabel.style.pointerEvents = 'auto'; scanLabel.style.opacity = '1';
+                console.error(err); ocrStatus.style.display = 'none'; mainInput.value = "Error scanning image.";
             });
         });
 
+        // ==========================================
+        // 5. ระบบ OCR อ่านภาพเบรลล์ (Hugging Face)
+        // ==========================================
         const brailleImageUpload = document.getElementById('brailleImageUpload');
         const brailleOcrStatus = document.getElementById('brailleOcrStatus');
-
         const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
         const OBR_API_KEY = "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";
 
         brailleImageUpload.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
             const bScanLabel = document.querySelector('label[for="brailleImageUpload"]');
-            bScanLabel.style.pointerEvents = 'none';
-            bScanLabel.style.opacity = '0.6';
-
+            bScanLabel.style.pointerEvents = 'none'; bScanLabel.style.opacity = '0.6';
             brailleOcrStatus.innerHTML = '<i class="fas fa-upload"></i> Uploading to Cloud AI...';
             brailleOcrStatus.style.display = 'block';
 
@@ -616,16 +491,10 @@
                 brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
                 
                 const response = await fetch(OBR_API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OBR_API_KEY}`,
-                        "Content-Type": file.type
-                    },
-                    body: arrayBuffer
+                    method: "POST", headers: { "Authorization": `Bearer ${OBR_API_KEY}`, "Content-Type": file.type }, body: arrayBuffer
                 });
 
                 const result = await response.json();
-
                 if (!response.ok) {
                     if (result.error && result.error.includes("loading")) {
                         let waitTime = result.estimated_time || 20;
@@ -635,26 +504,15 @@
                 }
                 
                 let extractedText = "";
-                if (Array.isArray(result) && result[0]?.generated_text) {
-                    extractedText = result[0].generated_text;
-                } else if (result.generated_text) {
-                    extractedText = result.generated_text;
-                } else {
-                    extractedText = JSON.stringify(result);
-                }
+                if (Array.isArray(result) && result[0]?.generated_text) extractedText = result[0].generated_text;
+                else if (result.generated_text) extractedText = result.generated_text;
+                else extractedText = JSON.stringify(result);
 
-                brailleInputRaw = extractedText;
-                updateBrailleDisplay();
-
+                brailleInputRaw = extractedText; updateBrailleDisplay();
             } catch (error) {
-                console.error("OBR Connection Error:", error);
-                brailleInputRaw = error.message;
-                updateBrailleDisplay();
-                
+                console.error("OBR Connection Error:", error); brailleInputRaw = error.message; updateBrailleDisplay();
             } finally {
-                bScanLabel.style.pointerEvents = 'auto';
-                bScanLabel.style.opacity = '1';
-                brailleOcrStatus.style.display = 'none';
+                bScanLabel.style.pointerEvents = 'auto'; bScanLabel.style.opacity = '1'; brailleOcrStatus.style.display = 'none';
             }
         });
     </script>

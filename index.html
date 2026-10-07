@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Braille Translator</title>
+    <title>Braille Translator & Trainer</title>
     <!-- โหลด Font ภาษาอังกฤษและไอคอนให้ดูสวยงาม -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,6 +16,8 @@
             --text-dark: #333333;
             --text-gray: #666666;
             --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --success: #28a745;
+            --danger: #dc3545;
         }
 
         body {
@@ -32,7 +34,7 @@
             user-select: none;
         }
 
-        textarea, input, #resultOutput {
+        textarea, input, select, #resultOutput {
             -webkit-user-select: text;
             user-select: text;
         }
@@ -45,10 +47,7 @@
             box-shadow: var(--shadow);
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
+        header h1 { margin: 0; font-size: 1.5rem; }
 
         main {
             flex: 1;
@@ -67,9 +66,11 @@
             box-shadow: var(--shadow);
         }
 
+        /* ปุ่มสลับโหมดหลัก */
         .mode-switch {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -78,11 +79,12 @@
             background-color: var(--light-blue);
             border: 2px solid var(--primary-blue);
             color: var(--primary-blue);
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 20px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
 
         .btn-mode.active {
@@ -102,17 +104,6 @@
             font-family: monospace;
         }
 
-        footer {
-            background-color: var(--white);
-            padding: 20px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-gray);
-            border-top: 1px solid #eee;
-        }
-
-        footer p { margin: 5px 0; }
-
         .dot-btn {
             width: 50px;
             height: 50px;
@@ -122,9 +113,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .dot-btn.active {
-            background-color: var(--primary-blue);
-        }
+        .dot-btn.active { background-color: var(--primary-blue); }
         
         .ctrl-btn {
             background: var(--light-blue);
@@ -134,62 +123,49 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
+            font-weight: 600;
         }
-        .ctrl-btn:hover {
-            background: var(--primary-blue);
-            color: white;
-        }
-        
-        #resultOutput.mirror-mode .interlinear-container {
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-        
-        #resultOutput.mirror-mode .interlinear-braille {
-            transform: scaleX(-1);
+        .ctrl-btn:hover { background: var(--primary-blue); color: white; }
+
+        .btn-action {
+            background: var(--primary-blue); color: white; border: none; 
+            padding: 10px 40px; border-radius: 8px; font-size: 1.1rem; 
+            cursor: pointer; font-weight: bold; box-shadow: var(--shadow);
+            width: 100%; box-sizing: border-box;
         }
         
+        #resultOutput.mirror-mode .interlinear-container { flex-direction: row-reverse; justify-content: flex-end; }
+        #resultOutput.mirror-mode .interlinear-braille { transform: scaleX(-1); }
         #resultOutput.mirror-mode .normal-braille-text {
-             display: block;
-             transform: scaleX(-1);
-             text-align: left;
-             direction: rtl;
-             unicode-bidi: bidi-override;
+             display: block; transform: scaleX(-1); text-align: left; direction: rtl; unicode-bidi: bidi-override;
         }
 
         #resultOutput {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #eee;
+            max-height: 300px; overflow-y: auto; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px solid #eee;
         }
 
-        .interlinear-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            line-height: 1.2;
-            margin-bottom: 15px;
-        }
-        .interlinear-char {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 22px;
-        }
-        .interlinear-braille {
-            font-size: 1.6rem;
-            font-family: 'Apple Braille', 'Segoe UI Historic', monospace;
-            color: var(--text-dark);
-        }
-        .interlinear-eng {
-            font-size: 1.1rem;
-            color: var(--primary-blue);
-            font-weight: bold;
-            font-family: monospace;
-        }
+        .interlinear-container { display: flex; flex-wrap: wrap; gap: 4px; line-height: 1.2; margin-bottom: 15px; }
+        .interlinear-char { display: flex; flex-direction: column; align-items: center; min-width: 22px; }
+        .interlinear-braille { font-size: 1.6rem; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; color: var(--text-dark); }
+        .interlinear-eng { font-size: 1.1rem; color: var(--primary-blue); font-weight: bold; font-family: monospace; }
+
+        /* Training Mode Styles */
+        .train-setting-group { margin-bottom: 15px; }
+        .train-setting-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.95rem; }
+        .train-setting-group select, .train-setting-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Prompt'; font-size: 1rem; box-sizing: border-box;}
+        #trainQuestionDisplay { font-size: 3rem; text-align: center; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; margin: 20px 0; color: var(--primary-blue); font-weight: bold; word-wrap: break-word;}
+        .progress-bar { width: 100%; background: #ddd; border-radius: 10px; height: 10px; margin-bottom: 15px; overflow: hidden;}
+        .progress-fill { height: 100%; background: var(--primary-blue); width: 0%; transition: width 0.3s;}
+        
+        .result-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem;}
+        .result-table th, .result-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .result-table th { background-color: var(--light-blue); color: var(--primary-blue); }
+        .text-success { color: var(--success); font-weight: bold; }
+        .text-danger { color: var(--danger); font-weight: bold; }
+
+        footer { background-color: var(--white); padding: 20px; text-align: center; font-size: 0.85rem; color: var(--text-gray); border-top: 1px solid #eee; }
+        footer p { margin: 5px 0; }
+        .ack-box { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: left; font-size: 0.8rem; margin-top: 15px; border: 1px solid #eee; display: none; line-height: 1.5; color: #555;}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
@@ -200,91 +176,167 @@
     </header>
 
     <main>
+        <!-- แถบเลือกโหมดหลัก -->
         <div class="mode-switch">
             <button class="btn-mode active" id="btnModeEngToBraille">Eng to Braille</button>
             <button class="btn-mode" id="btnModeBrailleToEng">Braille to Eng</button>
+            <button class="btn-mode" id="btnModeTraining"><i class="fas fa-graduation-cap"></i> Training</button>
         </div>
 
-        <div class="card" id="workspace">
-            <p id="instructionText" style="margin-top:0; color:var(--text-gray);">Enter English text below:</p>
-            
-            <!-- ส่วนอัปโหลดภาพ (โหมด Eng to Braille) - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
-            <div id="ocrSection" style="margin-bottom: 15px;">
-                <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
-                    <label for="imageUpload" style="background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--primary-blue); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center;">
-                        <i class="fas fa-upload"></i> Upload Image
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-                </div>
+        <!-- ============================================== -->
+        <!-- ส่วนที่ 1: เครื่องมือแปลภาษา (Translator Workspace) -->
+        <!-- ============================================== -->
+        <div id="translatorWorkspace">
+            <div class="card">
+                <p id="instructionText" style="margin-top:0; color:var(--text-gray); font-weight: 600;">Enter English text below:</p>
                 
-                <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...
-                </p>
-                
-                <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
-            </div>
-
-            <textarea id="mainInput" placeholder="Type English here..."></textarea>
-    
-            <div id="brailleOcrSection" style="display: none;">
-                <!-- ส่วนอัปโหลดภาพเบรลล์ - ปรับเป็นเลือกรูปจากเครื่องโดยไม่บังคับเปิดกล้อง -->
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                    <label for="brailleImageUpload" style="background: #f0ad4e; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; box-shadow: var(--shadow);">
-                        <i class="fas fa-upload"></i> Upload Braille Image
-                    </label>
-                    <input type="file" id="brailleImageUpload" accept="image/*" style="display: none;">
+                <div id="ocrSection" style="margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <label for="imageUpload" style="background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--primary-blue); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center;">
+                            <i class="fas fa-upload"></i> Upload Image
+                        </label>
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    </div>
+                    <p id="ocrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: 5px 0; display: none;"><i class="fas fa-spinner fa-spin"></i> Scanning image, please wait...</p>
+                    <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; display: none; margin: 0 auto 10px auto;">
                 </div>
-            
-                <p id="brailleOcrStatus" style="font-size: 0.85rem; color: #f0ad4e; margin: -5px 0 15px 0; display: none; text-align: center;">
-                    <i class="fas fa-spinner fa-spin"></i> Connecting to Cloud AI...
-                </p>
-            </div>
 
-            <div id="brailleKeyboard" style="display: none; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
-                        <button class="dot-btn" data-dot="1"></button>
-                        <button class="dot-btn" data-dot="4"></button>
-                        <button class="dot-btn" data-dot="2"></button>
-                        <button class="dot-btn" data-dot="5"></button>
-                        <button class="dot-btn" data-dot="3"></button>
-                        <button class="dot-btn" data-dot="6"></button>
+                <textarea id="mainInput" placeholder="Type English here..."></textarea>
+        
+                <!-- คีย์บอร์ดเบรลล์สำหรับการแปล -->
+                <div id="brailleKeyboard" style="display: none; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
+                            <button class="dot-btn" data-dot="1"></button> <button class="dot-btn" data-dot="4"></button>
+                            <button class="dot-btn" data-dot="2"></button> <button class="dot-btn" data-dot="5"></button>
+                            <button class="dot-btn" data-dot="3"></button> <button class="dot-btn" data-dot="6"></button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                        <button class="ctrl-btn" id="btnAddBraille">Add</button>
+                        <button class="ctrl-btn" id="btnSpace">Space</button>
+                        <button class="ctrl-btn" id="btnEnter">Enter</button>
+                        <button class="ctrl-btn" id="btnBackspace">Bksp</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; text-align: left;">
+                        <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-gray);">Your Braille Input:</p>
+                        <div id="brailleInputDisplay" style="min-height: 40px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word;"></div>
                     </div>
                 </div>
-                
-                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
-                    <button class="ctrl-btn" id="btnAddBraille">Add</button>
-                    <button class="ctrl-btn" id="btnSpace">Space</button>
-                    <button class="ctrl-btn" id="btnEnter">Enter</button>
-                    <button class="ctrl-btn" id="btnBackspace">Bksp</button>
-                </div>
-                
-                <div style="margin-top: 15px; text-align: left;">
-                    <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-gray);">Your Braille Input:</p>
-                    <div id="brailleInputDisplay" style="min-height: 40px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word;"></div>
+
+                <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <label style="font-size: 0.95rem; color: var(--text-dark); cursor: pointer; font-weight: 600;" id="interlinearLabel">
+                        <input type="checkbox" id="chkInterlinear" style="transform: scale(1.2); margin-right: 5px;"> 
+                        Parallel View
+                    </label>
+                    <button class="btn-action" id="btnTranslate">Translate</button>
                 </div>
             </div>
 
-            <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                <label style="font-size: 0.95rem; color: var(--text-dark); cursor: pointer; font-weight: 600;">
-                    <input type="checkbox" id="chkInterlinear" style="transform: scale(1.2); margin-right: 5px;"> 
-                    Parallel View (แสดงผลอักษรขนานบน-ล่าง)
-                </label>
-                
-                <button id="btnTranslate" style="background:var(--primary-blue); color:white; border:none; padding:10px 40px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; box-shadow: var(--shadow);">
-                    Translate
-                </button>
+            <!-- กล่องผลลัพธ์ -->
+            <div class="card" id="resultArea" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; color: var(--primary-blue);">Result</h3>
+                    <button id="btnMirror" style="display: none; background: #f0ad4e; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
+                        Mirror View
+                    </button>
+                </div>
+                <div id="resultOutput"></div>
             </div>
         </div>
 
-        <div class="card" id="resultArea" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="margin: 0; color: var(--primary-blue);">Result</h3>
-                <button id="btnMirror" style="display: none; background: #f0ad4e; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
-                    Mirror View
-                </button>
+        <!-- ============================================== -->
+        <!-- ส่วนที่ 2: โหมดแบบฝึกหัด (Training Mode Workspace) -->
+        <!-- ============================================== -->
+        <div id="trainingWorkspace" style="display: none;">
+            
+            <!-- หน้าตั้งค่าการฝึก -->
+            <div class="card" id="trainSetupCard">
+                <h3 style="margin-top: 0; color: var(--primary-blue); text-align: center;"><i class="fas fa-cogs"></i> Training Setup</h3>
+                <div class="train-setting-group">
+                    <label>Select Level:</label>
+                    <select id="trainLevel">
+                        <option value="1">Level 1 (Alphabet A-Z)</option>
+                        <option value="2">Level 2 (A1 Vocabulary)</option>
+                        <option value="3">Level 3 (A2 Vocabulary)</option>
+                        <option value="4">Level 4 (B1-B2 Vocabulary)</option>
+                    </select>
+                </div>
+                <div class="train-setting-group">
+                    <label>Practice Mode:</label>
+                    <select id="trainType">
+                        <option value="readBraille">Read Braille -> Type English</option>
+                        <option value="readEng">Read English -> Type Braille</option>
+                    </select>
+                </div>
+                <div class="train-setting-group">
+                    <label>Number of Questions:</label>
+                    <input type="number" id="trainCount" value="10" min="1" max="50">
+                </div>
+                <button class="btn-action" id="btnStartTrain" style="margin-top: 10px;">Start Practice</button>
             </div>
-            <div id="resultOutput" style="font-family: 'Apple Braille', 'Segoe UI Historic', monospace; font-size: 1.5rem; word-wrap: break-word; line-height: 1.8;"></div>
+
+            <!-- หน้ากำลังทำแบบฝึกหัด -->
+            <div class="card" id="trainActiveCard" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; color: var(--text-gray);">
+                    <span id="trainProgressText">Question 1 / 10</span>
+                    <span id="trainScoreText">Score: 0</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="trainProgressFill"></div></div>
+                
+                <!-- ตัวโจทย์ -->
+                <div id="trainQuestionDisplay">Target</div>
+
+                <!-- ช่องตอบกรณีพิมพ์อังกฤษ -->
+                <div id="trainEngInputArea" style="display: none; margin-bottom: 20px;">
+                    <input type="text" id="trainEngInput" placeholder="Type answer here..." style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid var(--primary-blue); font-size: 1.2rem; box-sizing: border-box; text-align: center;" autocomplete="off">
+                </div>
+
+                <!-- ช่องตอบกรณีพิมพ์เบรลล์ -->
+                <div id="trainBrailleInputArea" style="display: none; margin-bottom: 20px;">
+                    <div style="text-align: center; min-height: 50px; border: 2px dashed #ddd; border-radius: 8px; font-size: 2rem; padding: 10px; margin-bottom: 15px; font-family: 'Apple Braille', 'Segoe UI Historic', monospace;" id="trainBrailleDisplay"></div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 120px;">
+                            <button class="dot-btn train-dot" data-dot="1"></button> <button class="dot-btn train-dot" data-dot="4"></button>
+                            <button class="dot-btn train-dot" data-dot="2"></button> <button class="dot-btn train-dot" data-dot="5"></button>
+                            <button class="dot-btn train-dot" data-dot="3"></button> <button class="dot-btn train-dot" data-dot="6"></button>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                        <button class="ctrl-btn" id="btnTrainAdd">Add</button>
+                        <button class="ctrl-btn" id="btnTrainSpace">Space</button>
+                        <button class="ctrl-btn" id="btnTrainBksp">Bksp</button>
+                    </div>
+                </div>
+
+                <button class="btn-action" id="btnTrainSubmit">Submit Answer</button>
+            </div>
+
+            <!-- หน้าสรุปผล -->
+            <div class="card" id="trainResultCard" style="display: none;">
+                <h2 style="text-align: center; color: var(--primary-blue); margin-top: 0;">Practice Complete!</h2>
+                <div style="text-align: center; font-size: 4rem; font-weight: bold; margin: 10px 0;" id="finalScoreDisplay">8/10</div>
+                <p style="text-align: center; font-weight: 600; color: var(--text-gray);" id="finalScoreMessage">Great Job!</p>
+                
+                <div style="overflow-x: auto;">
+                    <table class="result-table" id="resultTable">
+                        <thead>
+                            <tr>
+                                <th>Word</th>
+                                <th>Your Answer</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultTableBody"></tbody>
+                    </table>
+                </div>
+
+                <button class="btn-action" id="btnTrainRestart" style="margin-top: 20px;">Play Again</button>
+            </div>
+
         </div>
 
     </main>
@@ -293,9 +345,32 @@
         <p>This application developed by CUEE Thanabodee Kaewchai is a part of Design Thinking Course in 2026.</p>
         <p>Contact the developer: <a href="mailto:f.kaewchai@gmail.com" style="color:var(--primary-blue); text-decoration:none;">f.kaewchai@gmail.com</a></p>
         <p>&copy; 2026 Thanabodee Kaewchai</p>
+        
+        <p style="margin-top: 15px;">
+            <a href="#" id="toggleAck" style="color:var(--primary-blue); font-weight: 600; text-decoration: none;">
+                <i class="fas fa-chevron-down"></i> See more (Acknowledgement)
+            </a>
+        </p>
+        <div class="ack-box" id="ackBox">
+            <strong>Acknowledgement and Announcement</strong><br><br>
+            This is the commercial web-based application developed by CUEE Thanabodee Kaewchai. This is a part of 2100225 Design Thinking Course in the first semester of 2026. (Solo Project #2)<br><br>
+            First, I would like to sincerely thank the Braille Authority of the United Kingdom for English references*, the Oxford 3000™ by CEFR level for its word list, and also Naptha's Tesseract.js** for picture-to-text detection. The script was powered by both ChatGPT and Gemini Pro. Lastly, I have the inspiration from Special Education CU to build this and assist their learning- they will be teachers for many disabled children in the future. Most of idea are from their student, Achima. Thanks so much.<br><br>
+            According to the policy of the course, this application costs THB 1.00 only for lifetime; however, you can try all features before paying as long as you need. (Just imagine to WinRAR.)<br><br>
+            Please do not hesitate to recheck and tell me whatever being error, dismissed, or incorrect via e-mail: f.kaewchai@gmail.com. You can ask for helping installation app into your phone desktop. (Android, IOS, and others but not so strange)<br><br>
+            Payment Method: <a href="https://forms.gle/xtvo87o5feftB4vV9" target="_blank">https://forms.gle/xtvo87o5feftB4vV9</a><br><br>
+            Thanabodee K.<br>Oct 26<br><br>
+            <hr style="border: 0.5px solid #ddd; margin: 10px 0;">
+            <em style="font-size: 0.7rem;">
+                *Oxford University Press. (n.d.). The Oxford 3000™ by CEFR level [PDF]. Oxford Learner's Dictionaries. https://www.oxfordlearnersdictionaries.com/external/pdf/wordlists/oxford-3000-5000/The_Oxford_3000_by_CEFR_level.pdf<br>
+                **Naptha. (2023). Tesseract.js: Pure Javascript OCR for 100 Languages (Version 4.1.3) [Computer software]. GitHub. https://github.com/naptha/tesseract.js
+            </em>
+        </div>
     </footer>
 
     <script>
+        // ==========================================
+        // 1. Core Dictionary & Data
+        // ==========================================
         const brailleDict = {
             'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
             'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
@@ -308,15 +383,46 @@
         const capSign = '⠠';
 
         const reverseBrailleDict = {};
-        for (let key in brailleDict) {
-            reverseBrailleDict[brailleDict[key]] = key;
+        for (let key in brailleDict) reverseBrailleDict[brailleDict[key]] = key;
+
+        // Vocabulary Datasets (Sampled from Oxford 3000 CEFR PDF)
+        const vocabL1 = "abcdefghijklmnopqrstuvwxyz".split("");
+        const vocabA1 = ["about", "bath", "bathroom", "cannot", "capital", "beach", "car", "card", "beautiful", "career", "carrot", "carry", "cat", "cent", "centre", "century", "chair", "change", "chart", "cheap", "check", "cheese", "chicken", "child", "chocolate", "choose", "cinema", "city", "class", "classroom", "clean", "climb", "clock", "close", "clothes", "club", "coat", "coffee", "cold", "college", "colour", "come", "common", "company", "compare", "complete", "computer", "concert", "cook", "cooking", "cool", "correct", "cost", "could", "country", "course", "cousin", "cow", "cream", "create", "culture", "cup", "customer", "cut", "dance", "dancer", "dancing", "dangerous", "dark", "date", "daughter", "decide", "delicious", "describe", "description", "design", "desk", "detail", "dialogue", "dictionary", "die", "diet", "difference", "different", "difficult", "dinner", "dirty", "discuss", "dish", "doctor", "dog", "dollar", "door", "down", "downstairs", "draw", "dress", "drink", "drive", "driver", "during", "early", "earn", "east", "easy", "eat", "egg", "eight", "elephant", "eleven", "email", "enjoy", "enough", "euro", "evening", "event", "every", "everybody", "everyone", "everything", "exam", "example", "excited", "exciting", "exercise", "expensive", "explain", "extra", "eye", "face", "fact", "fall", "false", "family", "famous", "fantastic", "farm", "farmer", "fast", "father", "favourite", "feel", "feeling", "festival", "fifteen", "fifty", "fill", "film", "final", "find", "fine", "finish", "fire", "first", "fish", "five", "flat", "flight", "floor", "flower", "fly", "follow", "food", "foot", "football", "forget", "form", "forty", "four", "fourteen", "fourth", "free", "friend", "friendly", "from", "front", "fruit", "full", "fun", "funny", "future", "game", "garden", "geography", "girl", "give", "glass", "good", "goodbye", "grandfather", "grandmother", "grandparent", "great", "green", "grey", "group", "grow", "guess", "guitar", "gym", "hair", "half", "hand", "happen", "happy", "hard", "hat", "hate", "have", "head", "health", "healthy", "hear", "hello", "help", "here", "high", "history", "hobby", "holiday", "home", "homework", "hope", "horse", "hospital", "hot", "hotel", "hour", "house", "hundred", "hungry", "husband", "ice", "idea", "imagine", "important", "improve", "include", "information", "interest", "interested", "interesting", "internet", "interview", "introduce", "island", "jacket", "jeans", "job", "join", "journey", "juice", "jump", "keep", "kilometre", "kind", "kitchen", "know", "land", "language", "large", "last", "late", "later", "laugh", "learn", "leave", "left", "leg", "lesson", "letter", "library", "life", "light", "like", "line", "lion", "list", "listen", "little", "live", "local", "long", "look", "lose", "love", "lunch", "machine", "magazine", "main", "make", "many", "map", "market", "married", "match", "maybe", "meal", "mean", "meaning", "meat", "meet", "meeting", "member", "menu", "message", "metre", "midnight", "mile", "milk", "million", "minute", "miss", "mistake", "model", "modern", "moment", "money", "month", "more", "morning", "most", "mother", "mountain", "mouse", "mouth", "move", "movie", "much", "mum", "museum", "music", "must", "name", "natural", "near", "need", "negative", "neighbour", "never", "news", "newspaper", "next", "nice", "night", "nine", "nineteen", "ninety", "nobody", "noise", "noisy", "none", "normal", "normally", "north", "nose", "note", "nothing", "number", "nurse", "object", "office", "often", "once", "onion", "online", "only", "open", "opinion", "opposite", "orange", "order", "other", "outside", "over", "page", "paint", "painting", "pair", "paper", "paragraph", "parent", "park", "part", "partner", "party", "passport", "past", "pay", "pen", "pencil", "people", "pepper", "perfect", "period", "person", "personal", "phone", "photo", "photograph", "phrase", "piano", "picture", "piece", "pig", "pink", "pizza", "place", "plan", "plane", "plant", "play", "player", "please", "point", "police", "pool", "poor", "popular", "positive", "possible", "post", "potato", "pound", "practice", "practise", "prefer", "prepare", "present", "pretty", "price", "probably", "problem", "product", "programme", "project", "purple", "quarter", "question", "quick", "quickly", "quiet", "quite", "radio", "rain", "read", "reader", "reading", "ready", "real", "really", "reason", "relax", "remember", "repeat", "report", "restaurant", "result", "return", "rice", "rich", "ride", "right", "river", "road", "room", "routine", "rule", "run", "sad", "salad", "salt", "same", "sandwich", "school", "science", "scientist", "sea", "second", "section", "sell", "send", "sentence", "seven", "seventeen", "seventy", "share", "sheep", "shirt", "shoe", "shop", "shopping", "short", "should", "show", "shower", "sick", "similar", "sing", "singer", "sister", "situation", "six", "sixteen", "sixty", "skill", "skirt", "sleep", "slow", "small", "snake", "snow", "somebody", "someone", "something", "sometimes", "song", "soon", "sorry", "sound", "soup", "south", "space", "speak", "special", "spell", "spelling", "spend", "sport", "spring", "stand", "star", "start", "statement", "station", "stay", "still", "stop", "story", "street", "strong", "student", "study", "style", "subject", "success", "sugar", "summer", "sunny", "supermarket", "sure", "sweater", "swim", "swimming", "table", "take", "talk", "tall", "taxi", "teach", "teacher", "team", "teenager", "telephone", "television", "tell", "tennis", "terrible", "test", "text", "than", "thank", "thanks", "that", "theatre", "their", "them", "then", "there", "they", "thing", "think", "third", "thirsty", "thirteen", "thirty", "this", "thousand", "three", "through", "ticket", "time", "tired", "title", "today", "together", "toilet", "tomato", "tomorrow", "tonight", "tooth", "topic", "tourist", "town", "traffic", "train", "travel", "tree", "trip", "trousers", "true", "T-shirt", "turn", "twelve", "twenty", "twice", "type", "umbrella", "uncle", "under", "understand", "university", "until", "upstairs", "useful", "usually", "vacation", "vegetable", "very", "video", "village", "visit", "visitor", "wait", "waiter", "wake", "walk", "wall", "want", "warm", "wash", "watch", "water", "wear", "weather", "website", "week", "weekend", "welcome", "well", "west", "what", "when", "where", "which", "white", "wife", "will", "window", "wine", "winter", "without", "woman", "wonderful", "word", "work", "worker", "world", "would", "write", "writer", "writing", "wrong", "year", "yellow", "yesterday", "young", "yourself"];
+        const vocabA2 = ["able", "ability", "abroad", "accept", "accident", "achieve", "active", "actually", "adult", "advantage", "adventure", "advertise", "advertisement", "advertising", "affect", "against", "airline", "alive", "allow", "almost", "alone", "along", "already", "alternative", "although", "among", "amount", "ancient", "ankle", "anybody", "anyway", "anywhere", "appear", "appearance", "apply", "architect", "architecture", "argue", "argument", "army", "arrange", "arrangement", "asleep", "assistant", "athlete", "attack", "attend", "attention", "attractive", "audience", "author", "available", "average", "avoid", "award", "awful", "background", "badly", "baseball", "basketball", "bean", "bear", "beef", "before", "behave", "behaviour", "belong", "belt", "benefit", "better", "between", "billion", "biology", "birth", "biscuit", "blood", "blow", "board", "boil", "bone", "book", "borrow", "boss", "bottom", "bowl", "brain", "bridge", "bright", "brilliant", "broken", "brush", "burn", "businessman", "button", "camp", "camping", "care", "careful", "carefully", "carpet", "cartoon", "case", "cash", "castle", "catch", "cause", "celebrate", "celebrity", "certain", "certainly", "chance", "character", "charity", "chat", "check", "chef", "chemistry", "chip", "choice", "church", "cigarette", "circle", "classical", "clear", "clearly", "clever", "climate", "closed", "clothing", "cloud", "coach", "coast", "code", "colleague", "collect", "column", "comedy", "comfortable", "comment", "communicate", "community", "compete", "competition", "complain", "completely", "condition", "conference", "connect", "connected", "consider", "contain", "context", "continent", "continue", "control", "cooker", "copy", "corner", "correctly", "count", "couple", "cover", "crazy", "creative", "credit", "crime", "criminal", "cross", "crowd", "crowded", "cupboard", "curly", "cycle", "daily", "danger", "dark", "data", "dead", "deal", "dear", "death", "decision", "deep", "definitely", "degree", "dentist", "department", "depend", "desert", "designer", "dessert", "destroy", "detective", "develop", "device", "diary", "differently", "digital", "direct", "direction", "director", "disagree", "disappear", "disaster", "discover", "discovery", "discussion", "disease", "distance", "divorced", "document", "double", "download", "downstairs", "drama", "drawing", "dream", "drive", "driving", "drop", "drug", "dry", "earn", "earth", "easily", "education", "effect", "either", "electric", "electrical", "electricity", "electronic", "employ", "employee", "employer", "empty", "ending", "energy", "engine", "engineer", "enormous", "enter", "environment", "equipment", "error", "especially", "essay", "everyday", "everywhere", "evidence", "exact", "exactly", "excellent", "except", "exist", "expect", "experience", "experiment", "expert", "explanation", "express", "expression", "extreme", "extremely", "factor", "factory", "fail", "fair", "fall", "farm", "farming", "fashion", "fear", "feature", "feed", "female", "fiction", "field", "fight", "figure", "finally", "finger", "firstly", "fishing", "fit", "fix", "flat", "flu", "flying", "focus", "following", "foreign", "forest", "fork", "formal", "fortunately", "forward", "fresh", "fridge", "frog", "furniture", "further", "future", "gallery", "gap", "gas", "gate", "general", "gift", "goal", "gold", "golf", "government", "grass", "greet", "ground", "guest", "guide", "gun", "habit", "hall", "happily", "headache", "heart", "heat", "heavy", "height", "helpful", "hero", "hers", "herself", "hide", "hike", "hill", "himself", "hit", "hockey", "hold", "hole", "huge", "human", "hurt", "ideal", "identify", "illness", "image", "immediately", "impossible", "included", "including", "increase", "incredible", "independent", "individual", "industry", "informal", "injury", "insect", "inside", "instead", "instruction", "instructor", "instrument", "intelligent", "international", "introduction", "invent", "invention", "invitation", "invite", "involve", "item", "itself", "jazz", "jewellery", "joke", "journalist", "jump", "kill", "king", "knee", "knife", "knock", "knowledge", "lady", "lake", "lamp", "laptop", "laughter", "law", "lawyer", "lazy", "lead", "leader", "learning", "least", "lecture", "lemon", "lend", "less", "level", "lifestyle", "lift", "likely", "link", "listener", "little", "lock", "lorry", "lost", "loud", "loudly", "lovely", "luck", "lucky", "mail", "major", "male", "manage", "manager", "manner", "mark", "marry", "material", "mathematics", "maths", "matter", "media", "medical", "medicine", "memory", "mention", "metal", "method", "middle", "might", "mind", "mine", "mirror", "missing", "mobile", "monkey", "moon", "mostly", "motorcycle", "movement", "musical", "musician", "myself", "narrow", "national", "nature", "nearly", "necessary", "neck", "neither", "nervous", "network", "noise", "noisy", "none", "normal", "normally", "notice", "novel", "nowhere", "number", "ocean", "offer", "officer", "oil", "onto", "opportunity", "option", "ordinary", "organization", "organize", "original", "ourselves", "outside", "oven", "owner", "pack", "pain", "painter", "palace", "pants", "parking", "particular", "passenger", "past", "patient", "pattern", "peace", "penny", "perform", "perhaps", "permission", "personality", "petrol", "photograph", "physical", "physics", "pick", "pilot", "planet", "plastic", "plate", "platform", "pleased", "pocket", "polite", "pollution", "population", "position", "possession", "possibility", "poster", "power", "predict", "present", "president", "prevent", "print", "printer", "prison", "prize", "process", "produce", "professional", "professor", "profile", "program", "progress", "promise", "pronounce", "protect", "provide", "public", "publish", "pull", "purpose", "push", "quality", "quantity", "queen", "question", "quietly", "race", "railway", "raise", "rate", "rather", "reach", "react", "realize", "receive", "recent", "recently", "reception", "recipe", "recognize", "recommend", "record", "recording", "recycle", "reduce", "refer", "refuse", "region", "regular", "relationship", "remove", "repair", "replace", "reply", "reporter", "request", "research", "researcher", "respond", "response", "rest", "review", "ride", "ring", "rise", "rock", "role", "roof", "round", "route", "rubbish", "rude", "runner", "running", "sadly", "safe", "sail", "sailing", "salary", "sale", "sauce", "save", "scared", "scary", "scene", "schedule", "score", "screen", "search", "season", "secondly", "secret", "secretary", "seem", "sense", "separate", "series", "serious", "serve", "service", "several", "shake", "shall", "shape", "sheet", "ship", "shoulder", "shout", "shut", "side", "sign", "silver", "simple", "since", "singing", "single", "site", "size", "ski", "skiing", "skin", "sky", "sleep", "slowly", "smartphone", "smell", "smile", "smoke", "smoking", "soap", "soccer", "social", "society", "sock", "soft", "soldier", "solution", "solve", "somewhere", "sort", "source", "speaker", "specific", "speech", "speed", "spider", "spoon", "square", "stage", "stair", "stamp", "start", "state", "stay", "steal", "step", "stomach", "stone", "store", "storm", "straight", "strange", "strategy", "stress", "structure", "stupid", "succeed", "successful", "suddenly", "suggest", "suggestion", "suit", "support", "suppose", "sure", "surprise", "surprised", "surprising", "survey", "sweet", "symbol", "system", "tablet", "target", "task", "taste", "teaching", "technology", "teenage", "temperature", "term", "themselves", "thick", "thief", "thin", "thinking", "third", "thought", "throw", "tidy", "tie", "tip", "tool", "touch", "tour", "tourism", "towards", "towel", "tower", "track", "tradition", "traditional", "train", "trainer", "training", "transport", "traveller", "trouble", "truck", "twin", "typical", "underground", "understanding", "unfortunately", "unhappy", "uniform", "unit", "united", "unusual", "upstairs", "user", "usual", "valley", "variety", "vehicle", "view", "virus", "voice", "wash", "washing", "wave", "weak", "wedding", "weight", "welcome", "wheel", "while", "whole", "whose", "wide", "wild", "wind", "winner", "wish", "wood", "wooden", "working", "worried", "worry", "worse", "worst", "yours", "zero"];
+        const vocabB1B2 = ["absolute", "academic", "acceptable", "accompany", "account", "accurate", "accuse", "acknowledge", "acquire", "actual", "adapt", "additional", "address", "administration", "adopt", "advance", "affair", "afterwards", "agency", "agenda", "aggressive", "aid", "aircraft", "alarm", "album", "alcohol", "alcoholic", "alternative", "amazed", "ambition", "ambitious", "analyse", "analysis", "announce", "announcement", "annoy", "annoyed", "annoying", "apart", "apologize", "appeal", "appearance", "application", "apply", "appointment", "appreciate", "approach", "appropriate", "approval", "approve", "approximately", "arise", "armed", "arms", "arrest", "arrival", "artificial", "artistic", "ashamed", "aspect", "assess", "assessment", "assign", "assignment", "assist", "associate", "associated", "association", "assume", "atmosphere", "attach", "attempt", "attitude", "attract", "attraction", "authority", "average", "award", "aware", "backwards", "bacteria", "bake", "balance", "ban", "bank", "bar", "barrier", "base", "based", "basic", "basically", "basis", "battery", "battle", "bear", "beat", "beauty", "bee", "beg", "being", "belief", "bell", "bend", "benefit", "bent", "bet", "beyond", "bill", "bite", "bitter", "blame", "blind", "block", "board", "bomb", "bond", "border", "bother", "branch", "brand", "brave", "breast", "breath", "breathe", "breathing", "bride", "brief", "broad", "broadcast", "bubble", "budget", "bullet", "bunch", "burn", "bury", "bush", "cable", "calculate", "calm", "campaign", "campus", "cancel", "cancer", "candidate", "cap", "capable", "capacity", "captain", "capture", "careless", "cast", "catch", "category", "ceiling", "celebration", "cell", "central", "centre", "ceremony", "chain", "chair", "challenge", "champion", "channel", "chapter", "characteristic", "charge", "chart", "cheap", "cheat", "cheerful", "chemical", "chest", "chief", "childhood", "circumstance", "cite", "citizen", "civil", "claim", "classic", "clause", "clear", "click", "client", "climb", "close", "closely", "cloth", "clue", "coach", "coal", "coin", "collapse", "collection", "coloured", "combination", "combine", "comfort", "command", "comment", "commercial", "commission", "commit", "commitment", "committee", "commonly", "communication", "comparison", "competitive", "competitor", "complaint", "complex", "complicated", "component", "concentrate", "concentration", "concept", "concern", "concerned", "conclude", "conclusion", "condition", "conduct", "confidence", "confident", "confirm", "conflict", "confuse", "confused", "confusing", "connection", "conscious", "consequence", "conservative", "consideration", "consist", "consistent", "constant", "constantly", "construct", "construction", "consume", "consumer", "contact", "container", "contemporary", "content", "contest", "continuous", "contract", "contrast", "contribute", "contribution", "convenient", "convert", "convince", "convinced", "cool", "core", "corporate", "costume", "cottage", "cotton", "council", "count", "countryside", "county", "courage", "court", "cover", "covered", "crash", "cream", "creation", "creature", "credit", "crew", "criminal", "crisis", "criterion", "critic", "critical", "criticism", "criticize", "crop", "crucial", "cruel", "cry", "cultural", "cure", "currency", "current", "currently", "curtain", "curve", "curved", "custom", "cut", "daily", "damage", "date", "deal", "debate", "debt", "decade", "decent", "declare", "decline", "decorate", "decoration", "decrease", "deep", "deeply", "defeat", "defence", "defend", "define", "definite", "definition", "delay", "deliberate", "deliberately", "delight", "delighted", "deliver", "delivery", "demand", "demonstrate", "deny", "departure", "depressed", "depressing", "depth", "desert", "deserve", "design", "desire", "desperate", "despite", "destination", "detail", "detailed", "detect", "determine", "determined", "development", "diagram", "diamond", "difficulty", "dig", "direct", "directly", "dirt", "disadvantage", "disappointed", "disappointing", "discipline", "discount", "dislike", "dismiss", "display", "distribute", "distribution", "district", "divide", "division", "document", "documentary", "domestic", "dominate", "donate", "double", "doubt", "downwards", "dozen", "draft", "drag", "dramatic", "dressed", "drop", "drum", "drunk", "due", "dust", "duty", "earthquake", "eastern", "economic", "economy", "edge", "edit", "edition", "editor", "educate", "educated", "educational", "effective", "effectively", "efficient", "effort", "elderly", "elect", "election", "element", "elsewhere", "embarrassed", "embarrassing", "emerge", "emergency", "emotion", "emotional", "emphasis", "emphasize", "employ", "employment", "empty", "enable", "encounter", "encourage", "enemy", "engage", "engaged", "engineering", "enhance", "enquiry", "ensure", "entertain", "entertainment", "enthusiasm", "enthusiastic", "entire", "entirely", "entrance", "entry", "environmental", "episode", "equal", "equally", "escape", "essential", "establish", "estate", "estimate", "ethical", "evaluate", "even", "eventually", "evil", "examination", "examine", "except", "exchange", "excitement", "excuse", "executive", "exhibition", "existence", "expand", "expectation", "expected", "expedition", "expense", "experience", "experienced", "experiment", "explode", "exploration", "explore", "explosion", "export", "expose", "extend", "extent", "external", "extra", "extraordinary", "extreme", "face", "facility", "factor", "failure", "fairly", "faith", "familiar", "fancy", "fascinating", "fashionable", "fasten", "fault", "favour", "fear", "feather", "feature", "fee", "feed", "feedback", "feel", "fellow", "fence", "fighting", "figure", "file", "finance", "financial", "finding", "fire", "firm", "fit", "fitness", "fix", "fixed", "flag", "flame", "flash", "flexible", "float", "flood", "flour", "flow", "fold", "folding", "folk", "following", "force", "forever", "forgive", "former", "fortune", "forward", "found", "frame", "free", "freedom", "freeze", "frequency", "frequently", "friendship", "frighten", "frightened", "frightening", "frozen", "fry", "fuel", "fully", "function", "fund", "fundamental", "funding", "fur", "further", "furthermore", "gain", "gang", "garage", "gather", "gender", "generally", "generate", "generation", "generous", "genre", "gentle", "ghost", "giant", "glad", "global", "glove", "goods", "govern", "grab", "grade", "gradually", "graduate", "grain", "grand", "grant", "grateful", "growth", "guarantee", "guard", "guilty", "hand", "handle", "hang", "happiness", "hardly", "harm", "harmful", "hate", "head", "headline", "hearing", "heating", "heaven", "heavily", "heel", "helicopter", "hell", "hesitate", "hide", "highlight", "highly", "hire", "historic", "historical", "hold", "hollow", "holy", "honest", "honour", "horrible", "horror", "host", "house", "household", "housing", "however", "humorous", "humour", "hunt", "hunting", "hurricane", "hurry", "hurt", "ideal", "identity", "ignore", "illegal", "illustrate", "illustration", "imaginary", "imagination", "immediate", "immigrant", "impact", "impatient", "imply", "import", "importance", "impose", "impress", "impressed", "impression", "impressive", "improvement", "inch", "incident", "income", "increasingly", "incredibly", "indeed", "indicate", "indirect", "indoor", "indoors", "industrial", "infection", "influence", "inform", "ingredient", "initial", "initially", "initiative", "injure", "injured", "inner", "innocent", "inquiry", "insight", "insist", "inspire", "install", "instance", "institute", "institution", "instruction", "insurance", "intelligence", "intend", "intended", "intense", "intention", "internal", "interpret", "interrupt", "invest", "investigate", "investigation", "investment", "involved", "iron", "issue", "journal", "joy", "judge", "judgement", "junior", "justice", "justify", "keen", "keyboard", "kick", "killing", "kind", "kiss", "knock", "label", "laboratory", "labour", "lack", "landscape", "largely", "latest", "launch", "lay", "layer", "lead", "leadership", "leading", "leaf", "league", "lean", "leather", "leave", "legal", "leisure", "length", "level", "licence", "lie", "limit", "limited", "line", "lip", "liquid", "literature", "live", "lively", "living", "load", "loan", "local", "locate", "located", "location", "logical", "lonely", "long-term", "loose", "lord", "loss", "low", "lower", "lung", "luxury", "mad", "magic", "mainly", "maintain", "majority", "make", "mall", "management", "map", "market", "marketing", "marriage", "mass", "massive", "master", "matching", "material", "maximum", "means", "meanwhile", "measure", "measurement", "medium", "melt", "mental", "mention", "mess", "mild", "military", "mine", "mineral", "minimum", "minister", "minor", "minority", "mission", "mistake", "mix", "mixed", "mixture", "model", "modify", "monitor", "mood", "moral", "motor", "mount", "move", "mud", "multiple", "multiply", "murder", "muscle", "musical", "mysterious", "mystery", "nail", "narrative", "nation", "national", "native", "naturally", "neat", "necessarily", "need", "needle", "negative", "neighbourhood", "neither", "nerve", "net", "nevertheless", "next", "nightmare", "nor", "normal", "northern", "note", "notion", "now", "nuclear", "numerous", "obey", "object", "objective", "obligation", "observation", "observe", "obtain", "obvious", "obviously", "occasion", "occasionally", "occur", "odd", "offence", "offend", "offensive", "official", "old-fashioned", "once", "opening", "operate", "operation", "opponent", "oppose", "opposed", "opposition", "organ", "organized", "organizer", "origin", "original", "originally", "otherwise", "ought", "ours", "outcome", "outdoor", "outdoors", "outer", "outline", "overall", "owe", "pace", "pack", "package", "pale", "pan", "panel", "parliament", "participant", "participate", "particularly", "partly", "pass", "passage", "passion", "path", "patient", "payment", "peaceful", "pension", "percentage", "perfectly", "performance", "permanent", "permit", "personally", "perspective", "persuade", "phase", "phenomenon", "philosophy", "photographer", "photography", "pick", "picture", "pile", "pin", "pipe", "pitch", "place", "plain", "planning", "pleasant", "pleasure", "plenty", "plot", "plus", "podcast", "poem", "poet", "poetry", "point", "pointed", "poison", "poisonous", "policy", "political", "politician", "politics", "popularity", "port", "portrait", "pose", "position", "positive", "possess", "possibly", "pot", "potential", "pour", "poverty", "powder", "power", "powerful", "practical", "pray", "prayer", "prediction", "pregnant", "preparation", "prepared", "presence", "presentation", "preserve", "press", "pressure", "pretend", "previous", "previously", "price", "priest", "prime", "principle", "print", "printing", "priority", "prisoner", "privacy", "private", "procedure", "process", "produce", "producer", "production", "profession", "professional", "profit", "program", "progress", "project", "promote", "proof", "proper", "properly", "property", "proposal", "propose", "prospect", "protect", "protection", "protest", "proud", "prove", "provide", "psychologist", "psychology", "publication", "publish", "pull", "punish", "punishment", "pupil", "purchase", "pure", "pursue", "push", "qualification", "qualified", "qualify", "queue", "quit", "quotation", "quote", "race", "racing", "range", "rank", "rapid", "rapidly", "rare", "rarely", "rate", "raw", "reach", "reaction", "realistic", "reality", "reasonable", "recall", "receipt", "recommendation", "recover", "reduction", "reference", "reflect", "regard", "regional", "register", "regret", "regulation", "relatively", "relevant", "relief", "religion", "religious", "rely", "remain", "remark", "remind", "remote", "renewable", "rent", "repair", "repeat", "repeated", "replace", "representative", "reputation", "require", "requirement", "rescue", "research", "reservation", "reserve", "resident", "resist", "resolve", "resort", "resource", "respect", "respond", "response", "responsibility", "responsible", "result", "retain", "retire", "retired", "reveal", "revise", "revolution", "reward", "rhythm", "rid", "ring", "rise", "risk", "robot", "rock", "role", "roll", "romantic", "roof", "root", "rope", "rough", "round", "routine", "row", "royal", "rub", "rubber", "rugby", "ruin", "rule", "run", "rural", "rush", "safety", "sail", "sailor", "sample", "sand", "satellite", "satisfied", "satisfy", "saving", "scale", "scan", "schedule", "scheme", "scientific", "scream", "screen", "script", "seat", "secondary", "sector", "secure", "security", "seed", "seek", "select", "selection", "self", "senior", "sense", "sensible", "sensitive", "sentence", "separate", "sequence", "seriously", "servant", "session", "set", "setting", "settle", "severe", "sex", "sexual", "shade", "shadow", "shake", "shallow", "shame", "shape", "share", "sharp", "shelf", "shell", "shelter", "shift", "shine", "shiny", "ship", "shock", "shocked", "shoot", "shooting", "shop", "shot", "shoulder", "shout", "show", "shut", "shy", "sick", "side", "sight", "sign", "signal", "significant", "significantly", "silence", "silent", "silk", "silly", "silver", "similar", "similarity", "similarly", "simple", "simply", "since", "sincere", "sing", "singer", "single", "sink", "sir", "site", "situation", "size", "skill", "skin", "skirt", "sky", "sleep", "slice", "slide", "slight", "slightly", "slip", "slope", "slow", "slowly", "smart", "smell", "smile", "smoke", "smooth", "snake", "snow", "soap", "soccer", "social", "society", "sock", "software", "soil", "solar", "soldier", "solid", "solution", "solve", "somewhat", "son", "song", "soon", "sorry", "sort", "soul", "sound", "soup", "source", "south", "southern", "space", "speak", "speaker", "special", "specialist", "species", "specific", "specifically", "speech", "speed", "spell", "spelling", "spend", "spicy", "spider", "spirit", "spiritual", "split", "spoken", "sponsor", "spoon", "sport", "spot", "spread", "spring", "square", "stable", "stadium", "staff", "stage", "stair", "stamp", "stand", "standard", "star", "stare", "start", "state", "statement", "station", "statistic", "statue", "status", "stay", "steady", "steal", "steel", "steep", "step", "stick", "still", "stock", "stomach", "stone", "stop", "store", "storm", "story", "straight", "strange", "stranger", "strategy", "stream", "street", "strength", "stress", "stretch", "strict", "strike", "string", "strong", "strongly", "structure", "struggle", "student", "studio", "study", "stuff", "stupid", "style", "subject", "submit", "substance", "succeed", "success", "successful", "successfully", "such", "sudden", "suddenly", "suffer", "sugar", "suggest", "suggestion", "suit", "suitable", "sum", "summarize", "summary", "summer", "sun", "Sunday", "sunny", "supermarket", "supply", "support", "supporter", "suppose", "sure", "surely", "surface", "surgery", "surprise", "surprised", "surprising", "surround", "surrounding", "survey", "survive", "suspect", "swear", "sweep", "sweet", "swim", "swimming", "switch", "symbol", "sympathy", "symptom", "system", "table", "tablet", "tail", "take", "tale", "talent", "talented", "talk", "tall", "tank", "target", "task", "taste", "tax", "taxi", "tea", "teach", "teacher", "teaching", "team", "tear", "technical", "technique", "technology", "teenage", "teenager", "telephone", "television", "tell", "temperature", "temporary", "tend", "tennis", "tent", "term", "terrible", "test", "text", "than", "thank", "thanks", "that", "theatre", "their", "theirs", "them", "theme", "themselves", "then", "theory", "therapy", "there", "therefore", "they", "thick", "thief", "thin", "thing", "think", "thinking", "third", "thirsty", "this", "though", "thought", "thousand", "threat", "threaten", "three", "throat", "through", "throughout", "throw", "Thursday", "thus", "ticket", "tidy", "tie", "tight", "till", "time", "tin", "tiny", "tip", "tired", "title", "to", "today", "toe", "together", "toilet", "tomato", "tomorrow", "tone", "tongue", "tonight", "too", "tool", "tooth", "top", "topic", "total", "totally", "touch", "tough", "tour", "tourism", "tourist", "towards", "towel", "tower", "town", "toy", "track", "trade", "tradition", "traditional", "traffic", "train", "trainer", "training", "transfer", "transform", "transition", "translate", "translation", "transport", "travel", "traveller", "treat", "treatment", "tree", "trend", "trial", "trick", "trip", "tropical", "trouble", "trousers", "truck", "true", "truly", "trust", "truth", "try", "tube", "Tuesday", "tune", "tunnel", "turn", "TV", "twelve", "twenty", "twice", "twin", "two", "type", "typical", "typically", "tyre", "ugly", "ultimately", "umbrella", "unable", "uncle", "uncomfortable", "unconscious", "under", "underground", "understand", "understanding", "underwear", "unemployed", "unemployment", "unexpected", "unfair", "unfortunately", "unhappy", "uniform", "union", "unique", "unit", "united", "universe", "university", "unknown", "unless", "unlike", "unlikely", "unnecessary", "unpleasant", "until", "unusual", "up", "update", "upon", "upper", "upstairs", "upwards", "urban", "urge", "us", "use", "used", "used to", "useful", "user", "usual", "usually", "vacation", "vaccine", "valley", "valuable", "value", "van", "variety", "various", "vary", "vast", "vegetable", "vehicle", "venue", "version", "very", "via", "victim", "victory", "video", "view", "viewer", "village", "violence", "violent", "virtual", "virus", "vision", "visit", "visitor", "visual", "vital", "vitamin", "voice", "volume", "volunteer", "vote", "wage", "wait", "waiter", "wake", "walk", "wall", "want", "war", "warm", "warn", "warning", "wash", "washing", "waste", "watch", "water", "wave", "way", "we", "weak", "weakness", "wealth", "wealthy", "weapon", "wear", "weather", "web", "website", "wedding", "Wednesday", "week", "weekend", "weigh", "weight", "welcome", "well", "well-being", "west", "western", "wet", "what", "whatever", "when", "whenever", "where", "whereas", "wherever", "whether", "which", "while", "white", "who", "whole", "whom", "whose", "why", "wide", "widely", "wife", "wild", "wildlife", "will", "willing", "win", "wind", "window", "wine", "wing", "winter", "wire", "wise", "wish", "with", "within", "without", "witness", "woman", "wonder", "wonderful", "wood", "wooden", "wool", "word", "work", "worker", "working", "world", "worldwide", "worried", "worry", "worse", "worst", "worth", "would", "wound", "wrap", "write", "writer", "writing", "written", "wrong", "yard", "yeah", "year", "yellow", "yes", "yesterday", "yet", "you", "young", "your", "yours", "yourself", "youth", "zero", "zone"];
+
+        // Helper: Convert English Text to Braille string
+        function textToBrailleStr(text) {
+            let out = "";
+            let isNum = false;
+            for(let i=0; i<text.length; i++){
+                let char = text[i];
+                if(char === ' ') { out += brailleDict[' ']; isNum=false; }
+                else if(/[0-9]/.test(char)) {
+                    if(!isNum) { out+=numSign; isNum=true; }
+                    out+=brailleDict[char];
+                } else {
+                    isNum=false;
+                    if(/[A-Z]/.test(char)) out+=capSign;
+                    out+=brailleDict[char.toLowerCase()] || char || "?";
+                }
+            }
+            return out;
         }
 
+        // ==========================================
+        // 2. UI Variables
+        // ==========================================
         let currentMode = 'E2B';
         let brailleInputRaw = "";
 
         const btnE2B = document.getElementById('btnModeEngToBraille');
         const btnB2E = document.getElementById('btnModeBrailleToEng');
+        const btnTrain = document.getElementById('btnModeTraining');
+        
+        const translatorWorkspace = document.getElementById('translatorWorkspace');
+        const trainingWorkspace = document.getElementById('trainingWorkspace');
+
         const mainInput = document.getElementById('mainInput');
         const brailleKeyboard = document.getElementById('brailleKeyboard');
         const instructionText = document.getElementById('instructionText');
@@ -325,93 +431,67 @@
         const btnTranslate = document.getElementById('btnTranslate');
         const btnMirror = document.getElementById('btnMirror');
         const brailleInputDisplay = document.getElementById('brailleInputDisplay');
-        const dotBtns = document.querySelectorAll('.dot-btn');
-
         const ocrSection = document.getElementById('ocrSection');
-        const brailleOcrSection = document.getElementById('brailleOcrSection');
+        const chkInterlinear = document.getElementById('chkInterlinear');
+        const interlinearLabel = document.getElementById('interlinearLabel');
 
+        // ==========================================
+        // 3. Tab Switching
+        // ==========================================
         btnE2B.addEventListener('click', () => {
             currentMode = 'E2B';
-            btnE2B.classList.add('active');
-            btnB2E.classList.remove('active');
-            
-            mainInput.style.display = 'block';
-            brailleKeyboard.style.display = 'none';
-            ocrSection.style.display = 'block';
-            brailleOcrSection.style.display = 'none';
-
-            instructionText.innerText = "Enter English text below:";
-            resultArea.style.display = 'none';
+            btnE2B.classList.add('active'); btnB2E.classList.remove('active'); btnTrain.classList.remove('active');
+            translatorWorkspace.style.display = 'block'; trainingWorkspace.style.display = 'none';
+            mainInput.style.display = 'block'; brailleKeyboard.style.display = 'none'; ocrSection.style.display = 'block';
+            interlinearLabel.style.display = 'inline-block';
+            instructionText.innerText = "Enter English text below:"; resultArea.style.display = 'none';
         });
 
         btnB2E.addEventListener('click', () => {
             currentMode = 'B2E';
-            btnB2E.classList.add('active');
-            btnE2B.classList.remove('active');
-            
-            mainInput.style.display = 'none';
-            brailleKeyboard.style.display = 'block';
-            ocrSection.style.display = 'none';
-            brailleOcrSection.style.display = 'block';
-
-            instructionText.innerText = "Press dots to create a Braille cell, then tap Add:";
-            resultArea.style.display = 'none';
+            btnB2E.classList.add('active'); btnE2B.classList.remove('active'); btnTrain.classList.remove('active');
+            translatorWorkspace.style.display = 'block'; trainingWorkspace.style.display = 'none';
+            mainInput.style.display = 'none'; brailleKeyboard.style.display = 'block'; ocrSection.style.display = 'none';
+            interlinearLabel.style.display = 'inline-block';
+            instructionText.innerText = "Press dots to create a Braille cell, then tap Add:"; resultArea.style.display = 'none';
             updateBrailleDisplay();
         });
 
-        dotBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.classList.toggle('active');
-            });
+        btnTrain.addEventListener('click', () => {
+            currentMode = 'TRAIN';
+            btnTrain.classList.add('active'); btnE2B.classList.remove('active'); btnB2E.classList.remove('active');
+            translatorWorkspace.style.display = 'none'; trainingWorkspace.style.display = 'block';
+            document.getElementById('trainSetupCard').style.display = 'block';
+            document.getElementById('trainActiveCard').style.display = 'none';
+            document.getElementById('trainResultCard').style.display = 'none';
         });
 
-        function getCellFromDots() {
+        // ==========================================
+        // 4. Translator Logic (Original)
+        // ==========================================
+        const dotBtns = document.querySelectorAll('#brailleKeyboard .dot-btn');
+        dotBtns.forEach(btn => { btn.addEventListener('click', () => { btn.classList.toggle('active'); }); });
+
+        function getCellFromDots(containerSelector) {
             let dotMap = [0,0,0,0,0,0,0,0];
-            dotBtns.forEach(btn => {
-                if (btn.classList.contains('active')) {
-                    dotMap[parseInt(btn.getAttribute('data-dot')) - 1] = 1;
-                }
+            document.querySelectorAll(containerSelector + ' .dot-btn').forEach(btn => {
+                if (btn.classList.contains('active')) dotMap[parseInt(btn.getAttribute('data-dot')) - 1] = 1;
             });
             let base = 0x2800;
             let val = (dotMap[0]<<0) | (dotMap[1]<<1) | (dotMap[2]<<2) | (dotMap[3]<<3) | (dotMap[4]<<4) | (dotMap[5]<<5);
             return String.fromCharCode(base + val);
         }
 
-        function clearDots() {
-            dotBtns.forEach(btn => btn.classList.remove('active'));
-        }
-
-        function updateBrailleDisplay() {
-            brailleInputDisplay.innerText = brailleInputRaw;
-        }
+        function clearDots(containerSelector) { document.querySelectorAll(containerSelector + ' .dot-btn').forEach(b => b.classList.remove('active')); }
+        function updateBrailleDisplay() { brailleInputDisplay.innerText = brailleInputRaw; }
 
         document.getElementById('btnAddBraille').addEventListener('click', () => {
-            let cell = getCellFromDots();
-            if (cell !== String.fromCharCode(0x2800)) {
-                brailleInputRaw += cell;
-                updateBrailleDisplay();
-                clearDots();
-            }
+            let cell = getCellFromDots('#brailleKeyboard');
+            if (cell !== String.fromCharCode(0x2800)) { brailleInputRaw += cell; updateBrailleDisplay(); clearDots('#brailleKeyboard'); }
         });
-
-        document.getElementById('btnSpace').addEventListener('click', () => {
-            brailleInputRaw += '⠀';
-            updateBrailleDisplay();
-            clearDots();
-        });
-
-        document.getElementById('btnEnter').addEventListener('click', () => {
-            brailleInputRaw += '\n';
-            updateBrailleDisplay();
-            clearDots();
-        });
-
-        document.getElementById('btnBackspace').addEventListener('click', () => {
-            brailleInputRaw = brailleInputRaw.slice(0, -1);
-            updateBrailleDisplay();
-        });
-
-        const chkInterlinear = document.getElementById('chkInterlinear');
+        document.getElementById('btnSpace').addEventListener('click', () => { brailleInputRaw += '⠀'; updateBrailleDisplay(); clearDots('#brailleKeyboard'); });
+        document.getElementById('btnEnter').addEventListener('click', () => { brailleInputRaw += '\n'; updateBrailleDisplay(); clearDots('#brailleKeyboard'); });
+        document.getElementById('btnBackspace').addEventListener('click', () => { brailleInputRaw = brailleInputRaw.slice(0, -1); updateBrailleDisplay(); });
 
         btnTranslate.addEventListener('click', () => {
             resultArea.style.display = 'block';
@@ -419,38 +499,20 @@
             let outputText = "";
 
             if (currentMode === 'E2B') {
-                btnMirror.style.display = 'block';
-                btnMirror.classList.remove('active');
-                resultOutput.classList.remove('mirror-mode');
-                
-                let text = mainInput.value;
-                let isNumberMode = false;
-
+                btnMirror.style.display = 'block'; btnMirror.classList.remove('active'); resultOutput.classList.remove('mirror-mode');
+                let text = mainInput.value; let isNumberMode = false;
                 if (isInterlinear) {
                     outputText = '<div class="interlinear-container">';
                     for (let i = 0; i < text.length; i++) {
-                        let char = text[i];
-                        let bChar = "";
-                        let eChar = char;
-                        
-                        if (char === ' ') { 
-                            bChar = brailleDict[' ']; 
-                            isNumberMode = false;
-                        } else if (char === '\n') { 
-                            outputText += '</div><div class="interlinear-container">'; 
-                            isNumberMode = false;
-                            continue; 
-                        } else if (/[0-9]/.test(char)) {
-                            if (!isNumberMode) {
-                                outputText += `<div class="interlinear-char"><span class="interlinear-braille">${numSign}</span><span class="interlinear-eng"></span></div>`;
-                                isNumberMode = true;
-                            }
+                        let char = text[i]; let bChar = ""; let eChar = char;
+                        if (char === ' ') { bChar = brailleDict[' ']; isNumberMode = false; } 
+                        else if (char === '\n') { outputText += '</div><div class="interlinear-container">'; isNumberMode = false; continue; } 
+                        else if (/[0-9]/.test(char)) {
+                            if (!isNumberMode) { outputText += `<div class="interlinear-char"><span class="interlinear-braille">${numSign}</span><span class="interlinear-eng"></span></div>`; isNumberMode = true; }
                             bChar = brailleDict[char];
                         } else {
                             isNumberMode = false;
-                            if (/[A-Z]/.test(char)) {
-                                outputText += `<div class="interlinear-char"><span class="interlinear-braille">${capSign}</span><span class="interlinear-eng"></span></div>`;
-                            }
+                            if (/[A-Z]/.test(char)) outputText += `<div class="interlinear-char"><span class="interlinear-braille">${capSign}</span><span class="interlinear-eng"></span></div>`;
                             bChar = brailleDict[char.toLowerCase()] || char;
                         }
                         outputText += `<div class="interlinear-char"><span class="interlinear-braille">${bChar}</span><span class="interlinear-eng">${eChar}</span></div>`;
@@ -467,22 +529,19 @@
                             outputText += brailleDict[char];
                         } else {
                             isNumberMode = false;
-                            if (/[A-Z]/.test(char)) { outputText += capSign; }
+                            if (/[A-Z]/.test(char)) outputText += capSign;
                             outputText += brailleDict[char.toLowerCase()] || char;
                         }
                     }
                     outputText += '</div>';
                 }
-            } 
-            else {
+            } else {
                 btnMirror.style.display = 'none';
                 let lines = brailleInputRaw.split('\n');
-
                 if (isInterlinear) {
                     outputText = '<div class="interlinear-container">';
                     for (let line of lines) {
-                        let isNum = false;
-                        let isCap = false;
+                        let isNum = false; let isCap = false;
                         for (let char of line) {
                             let eChar = "";
                             if (char === numSign) { isNum = true; eChar = ""; } 
@@ -494,10 +553,8 @@
                                     if (isNum) {
                                         const numMap = {'a':'1','b':'2','c':'3','d':'4','e':'5','f':'6','g':'7','h':'8','i':'9','j':'0'};
                                         eChar = numMap[mapped] || mapped;
-                                    } else if (isCap) {
-                                        eChar = mapped.toUpperCase();
-                                        isCap = false;
-                                    } else { eChar = mapped; }
+                                    } else if (isCap) { eChar = mapped.toUpperCase(); isCap = false; } 
+                                    else { eChar = mapped; }
                                 } else { eChar = "?"; }
                             }
                             outputText += `<div class="interlinear-char"><span class="interlinear-braille">${char}</span><span class="interlinear-eng">${eChar}</span></div>`;
@@ -507,11 +564,10 @@
                     outputText += '</div>';
                 } else {
                     let finalLines = lines.map(line => {
-                        let engLine = "";
-                        let isNum = false; let isCap = false;
+                        let engLine = ""; let isNum = false; let isCap = false;
                         for (let char of line) {
-                            if (char === numSign) { isNum = true; } 
-                            else if (char === capSign) { isCap = true; } 
+                            if (char === numSign) isNum = true;
+                            else if (char === capSign) isCap = true;
                             else if (char === '⠀') { engLine += ' '; isNum = false; } 
                             else {
                                 let mapped = reverseBrailleDict[char];
@@ -519,9 +575,8 @@
                                     if (isNum) {
                                         const numMap = {'a':'1','b':'2','c':'3','d':'4','e':'5','f':'6','g':'7','h':'8','i':'9','j':'0'};
                                         engLine += numMap[mapped] || mapped;
-                                    } else if (isCap) {
-                                        engLine += mapped.toUpperCase(); isCap = false;
-                                    } else { engLine += mapped; }
+                                    } else if (isCap) { engLine += mapped.toUpperCase(); isCap = false; } 
+                                    else { engLine += mapped; }
                                 } else { engLine += "?"; }
                             }
                         }
@@ -533,119 +588,209 @@
             resultOutput.innerHTML = outputText;
         });
 
-        btnMirror.addEventListener('click', () => {
-            resultOutput.classList.toggle('mirror-mode');
-        });
+        btnMirror.addEventListener('click', () => { resultOutput.classList.toggle('mirror-mode'); });
 
+        // OCR Camera Image (English Only)
         const imageUpload = document.getElementById('imageUpload');
         const imagePreview = document.getElementById('imagePreview');
         const ocrStatus = document.getElementById('ocrStatus');
 
         imageUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
+            const file = e.target.files[0]; if (!file) return;
             const scanLabel = document.querySelector('label[for="imageUpload"]');
-            scanLabel.style.pointerEvents = 'none';
-            scanLabel.style.opacity = '0.6';
-
+            scanLabel.style.pointerEvents = 'none'; scanLabel.style.opacity = '0.6';
             const reader = new FileReader();
-            reader.onload = function(event) {
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = 'block';
-            }
+            reader.onload = function(event) { imagePreview.src = event.target.result; imagePreview.style.display = 'block'; }
             reader.readAsDataURL(file);
 
-            ocrStatus.style.display = 'block';
-            mainInput.value = "Scanning... please wait.";
+            ocrStatus.style.display = 'block'; mainInput.value = "Scanning... please wait.";
 
-            Tesseract.recognize(
-                file,
-                'eng',
-                { logger: m => console.log(m) }
-            ).then(({ data: { text } }) => {
-                scanLabel.style.pointerEvents = 'auto';
-                scanLabel.style.opacity = '1';
-                ocrStatus.style.display = 'none';
-                
+            Tesseract.recognize(file, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
+                scanLabel.style.pointerEvents = 'auto'; scanLabel.style.opacity = '1'; ocrStatus.style.display = 'none';
                 let cleanedText = text.replace(/\n\s*\n/g, '\n').trim();
-                
-                if (cleanedText === "") {
-                    mainInput.value = "Could not detect any English text in this image.";
-                } else {
-                    mainInput.value = cleanedText;
-                }
+                mainInput.value = cleanedText === "" ? "Could not detect any English text in this image." : cleanedText;
             }).catch(err => {
-                scanLabel.style.pointerEvents = 'auto';
-                scanLabel.style.opacity = '1';
-                console.error(err);
-                ocrStatus.style.display = 'none';
-                mainInput.value = "Error scanning image. Please try typing instead.";
+                scanLabel.style.pointerEvents = 'auto'; scanLabel.style.opacity = '1'; ocrStatus.style.display = 'none';
+                console.error(err); mainInput.value = "Error scanning image. Please try typing instead.";
             });
         });
 
-        const brailleImageUpload = document.getElementById('brailleImageUpload');
-        const brailleOcrStatus = document.getElementById('brailleOcrStatus');
+        // ==========================================
+        // 5. Training Mode Logic
+        // ==========================================
+        let trainQuestions = [];
+        let trainCurrentIndex = 0;
+        let trainScore = 0;
+        let trainResultsLog = [];
+        let currentTrainMode = "readBraille"; // readBraille or readEng
+        let trainBrailleInputRaw = "";
 
-        const OBR_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"; 
-        const OBR_API_KEY = "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";
+        const btnStartTrain = document.getElementById('btnStartTrain');
+        const btnTrainSubmit = document.getElementById('btnTrainSubmit');
+        const btnTrainRestart = document.getElementById('btnTrainRestart');
+        
+        // Train Braille Keyboard interactions
+        document.querySelectorAll('#trainBrailleInputArea .train-dot').forEach(btn => {
+            btn.addEventListener('click', () => { btn.classList.toggle('active'); });
+        });
+        function updateTrainBrailleDisplay() { document.getElementById('trainBrailleDisplay').innerText = trainBrailleInputRaw; }
+        
+        document.getElementById('btnTrainAdd').addEventListener('click', () => {
+            let cell = getCellFromDots('#trainBrailleInputArea');
+            if (cell !== String.fromCharCode(0x2800)) { trainBrailleInputRaw += cell; updateTrainBrailleDisplay(); clearDots('#trainBrailleInputArea'); }
+        });
+        document.getElementById('btnTrainSpace').addEventListener('click', () => { trainBrailleInputRaw += '⠀'; updateTrainBrailleDisplay(); clearDots('#trainBrailleInputArea'); });
+        document.getElementById('btnTrainBksp').addEventListener('click', () => { trainBrailleInputRaw = trainBrailleInputRaw.slice(0, -1); updateTrainBrailleDisplay(); });
 
-        brailleImageUpload.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        btnStartTrain.addEventListener('click', () => {
+            const level = document.getElementById('trainLevel').value;
+            currentTrainMode = document.getElementById('trainType').value;
+            let count = parseInt(document.getElementById('trainCount').value) || 10;
             
-            const bScanLabel = document.querySelector('label[for="brailleImageUpload"]');
-            bScanLabel.style.pointerEvents = 'none';
-            bScanLabel.style.opacity = '0.6';
+            let sourceArray = [];
+            if(level === "1") sourceArray = vocabL1;
+            else if(level === "2") sourceArray = vocabA1;
+            else if(level === "3") sourceArray = vocabA2;
+            else sourceArray = vocabB1B2;
 
-            brailleOcrStatus.innerHTML = '<i class="fas fa-upload"></i> Uploading to Cloud AI...';
-            brailleOcrStatus.style.display = 'block';
+            // Randomly select 'count' items
+            let shuffled = [...sourceArray].sort(() => 0.5 - Math.random());
+            trainQuestions = shuffled.slice(0, count);
+            
+            trainCurrentIndex = 0; trainScore = 0; trainResultsLog = [];
+            
+            document.getElementById('trainSetupCard').style.display = 'none';
+            document.getElementById('trainActiveCard').style.display = 'block';
+            
+            if(currentTrainMode === 'readBraille') {
+                document.getElementById('trainEngInputArea').style.display = 'block';
+                document.getElementById('trainBrailleInputArea').style.display = 'none';
+            } else {
+                document.getElementById('trainEngInputArea').style.display = 'none';
+                document.getElementById('trainBrailleInputArea').style.display = 'block';
+            }
+            
+            loadTrainQuestion();
+        });
 
-            try {
-                const arrayBuffer = await file.arrayBuffer();
+        function loadTrainQuestion() {
+            document.getElementById('trainProgressText').innerText = `Question ${trainCurrentIndex + 1} / ${trainQuestions.length}`;
+            document.getElementById('trainScoreText').innerText = `Score: ${trainScore}`;
+            document.getElementById('trainProgressFill').style.width = `${(trainCurrentIndex / trainQuestions.length) * 100}%`;
+            
+            let targetWord = trainQuestions[trainCurrentIndex];
+            
+            if(currentTrainMode === 'readBraille') {
+                // Show Braille, user types English
+                document.getElementById('trainQuestionDisplay').style.fontFamily = "'Apple Braille', 'Segoe UI Historic', monospace";
+                document.getElementById('trainQuestionDisplay').innerText = textToBrailleStr(targetWord);
+                document.getElementById('trainEngInput').value = "";
+                document.getElementById('trainEngInput').focus();
+            } else {
+                // Show English, user types Braille
+                document.getElementById('trainQuestionDisplay').style.fontFamily = "'Prompt', sans-serif";
+                document.getElementById('trainQuestionDisplay').innerText = targetWord;
+                trainBrailleInputRaw = "";
+                updateTrainBrailleDisplay();
+                clearDots('#trainBrailleInputArea');
+            }
+        }
 
-                brailleOcrStatus.innerHTML = '<i class="fas fa-cog fa-spin"></i> AI is analyzing 3D dots and shadows...';
+        // Allow pressing Enter in input field
+        document.getElementById('trainEngInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') btnTrainSubmit.click();
+        });
+
+        btnTrainSubmit.addEventListener('click', () => {
+            let targetWord = trainQuestions[trainCurrentIndex];
+            let isCorrect = false;
+            let userAnswer = "";
+            let correctAnswer = "";
+
+            if(currentTrainMode === 'readBraille') {
+                userAnswer = document.getElementById('trainEngInput').value.trim().toLowerCase();
+                correctAnswer = targetWord.toLowerCase();
+                if(userAnswer === correctAnswer) isCorrect = true;
+            } else {
+                userAnswer = trainBrailleInputRaw.trim();
+                correctAnswer = textToBrailleStr(targetWord).trim();
+                if(userAnswer === correctAnswer) isCorrect = true;
+            }
+
+            if(isCorrect) trainScore++;
+            
+            trainResultsLog.push({
+                word: targetWord,
+                user: userAnswer || "(blank)",
+                correct: correctAnswer,
+                isCorrect: isCorrect
+            });
+
+            trainCurrentIndex++;
+            if(trainCurrentIndex < trainQuestions.length) {
+                loadTrainQuestion();
+            } else {
+                showTrainResults();
+            }
+        });
+
+        function showTrainResults() {
+            document.getElementById('trainActiveCard').style.display = 'none';
+            document.getElementById('trainResultCard').style.display = 'block';
+            
+            document.getElementById('finalScoreDisplay').innerText = `${trainScore}/${trainQuestions.length}`;
+            let ratio = trainScore / trainQuestions.length;
+            let msg = ratio >= 0.8 ? "Excellent! Keep it up! 🏆" : (ratio >= 0.5 ? "Good job! 👏" : "Keep practicing! 💪");
+            document.getElementById('finalScoreMessage').innerText = msg;
+
+            let tbody = document.getElementById('resultTableBody');
+            tbody.innerHTML = "";
+            
+            trainResultsLog.forEach(log => {
+                let tr = document.createElement('tr');
                 
-                const response = await fetch(OBR_API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OBR_API_KEY}`,
-                        "Content-Type": file.type
-                    },
-                    body: arrayBuffer
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    if (result.error && result.error.includes("loading")) {
-                        let waitTime = result.estimated_time || 20;
-                        throw new Error(`AI กำลังเตรียมพร้อม (Model is loading)... โปรดรอ ${Math.ceil(waitTime)} วินาทีแล้วลองกดอัปโหลดใหม่อีกครั้ง`);
-                    }
-                    throw new Error(result.error || "Server Error: " + response.statusText);
-                }
+                let tdWord = document.createElement('td');
+                // แสดงคำเป้าหมายให้ชัดเจนขึ้นอยู่กับโหมด
+                tdWord.innerHTML = currentTrainMode === 'readBraille' ? `<span style="font-family:'Apple Braille', monospace; font-size:1.5rem;">${textToBrailleStr(log.word)}</span><br><small>(${log.word})</small>` : `<b>${log.word}</b>`;
                 
-                let extractedText = "";
-                if (Array.isArray(result) && result[0]?.generated_text) {
-                    extractedText = result[0].generated_text;
-                } else if (result.generated_text) {
-                    extractedText = result.generated_text;
+                let tdAns = document.createElement('td');
+                if(currentTrainMode === 'readEng') tdAns.style.fontFamily = "'Apple Braille', monospace";
+                tdAns.style.fontSize = currentTrainMode === 'readEng' ? "1.5rem" : "1rem";
+                
+                if(log.isCorrect) {
+                    tdAns.innerHTML = `<span class="text-success">${log.user} <i class="fas fa-check-circle"></i></span>`;
                 } else {
-                    extractedText = JSON.stringify(result);
+                    tdAns.innerHTML = `<span class="text-danger" style="text-decoration: line-through;">${log.user}</span><br><span class="text-success">${log.correct}</span>`;
                 }
-
-                brailleInputRaw = extractedText;
-                updateBrailleDisplay();
-
-            } catch (error) {
-                console.error("OBR Connection Error:", error);
-                brailleInputRaw = error.message;
-                updateBrailleDisplay();
                 
-            } finally {
-                bScanLabel.style.pointerEvents = 'auto';
-                bScanLabel.style.opacity = '1';
-                brailleOcrStatus.style.display = 'none';
+                let tdRes = document.createElement('td');
+                tdRes.innerHTML = log.isCorrect ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+                
+                tr.appendChild(tdWord); tr.appendChild(tdAns); tr.appendChild(tdRes);
+                tbody.appendChild(tr);
+            });
+        }
+
+        btnTrainRestart.addEventListener('click', () => {
+            document.getElementById('trainResultCard').style.display = 'none';
+            document.getElementById('trainSetupCard').style.display = 'block';
+        });
+
+        // ==========================================
+        // 6. Acknowledgement Toggle
+        // ==========================================
+        document.getElementById('toggleAck').addEventListener('click', function(e) {
+            e.preventDefault();
+            const ackBox = document.getElementById('ackBox');
+            const icon = this.querySelector('i');
+            if (ackBox.style.display === 'none' || ackBox.style.display === '') {
+                ackBox.style.display = 'block';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                ackBox.style.display = 'none';
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
             }
         });
     </script>
